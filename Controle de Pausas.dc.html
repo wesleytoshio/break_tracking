@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- React empacotado localmente para funcionar offline. O runtime dc (support.js)
+     detecta window.React/window.ReactDOM e, por isso, NÃO busca da CDN. -->
+<script src="./vendor/react.production.min.js"></script>
+<script src="./vendor/react-dom.production.min.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'Hanken Grotesk', system-ui, sans-serif; background: #0c0d10; color: #e6e8eb; -webkit-font-smoothing: antialiased; }
+  a { color: #6aa8ff; text-decoration: none; }
+  a:hover { color: #8cbcff; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #2a2f37; border-radius: 8px; border: 2px solid #0c0d10; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a414b; }
+  input, select, button { font-family: inherit; }
+  /* Ícones dentro de botões não capturam clique: o botão inteiro fica clicável. */
+  button svg { pointer-events: none; }
+  input::placeholder { color: #5b626c; }
+  select option { background: #16181d; }
+  @keyframes cp-shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+  @keyframes cp-modalIn { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes cp-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes cp-toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+  @keyframes cp-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.85); } }
+  @keyframes cp-spin { to { transform: rotate(360deg); } }
+  /* Barra de título customizada (janela sem frame nativo) */
+  .cp-drag { -webkit-app-region: drag; }
+  .cp-nodrag { -webkit-app-region: no-drag; }
+  .cp-winbtn { -webkit-app-region: no-drag; width: 32px; height: 28px; border-radius: 7px; border: none; padding: 0; margin: 0; background: transparent; color: #9aa1ab; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 0; transition: background .12s, color .12s; }
+  .cp-winbtn svg { display: block; }
+  .cp-winbtn:hover { background: #23272e; color: #e6e8eb; }
+  .cp-winclose:hover { background: #e11d48; color: #fff; }
+</style>
+</helmet>
+
+<div style="display: flex; height: 100vh; width: 100%; overflow: hidden; background: #0c0d10; color: #e6e8eb; position: relative;">
+
+  <!-- SIDEBAR -->
+  <aside style="{{ sidebarStyle }}">
+    <div style="{{ brandRowStyle }}">
+      <div style="width: 34px; height: 34px; flex: 0 0 34px; border-radius: 9px; background: linear-gradient(140deg, #4f8ef7, #2f6fe0); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(79,142,247,.35);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2"/><path d="M9 2h6"/></svg>
+      </div>
+      <div style="{{ brandTextStyle }}">
+        <div style="font-size: 14.5px; font-weight: 700; letter-spacing: -.2px; white-space: nowrap;">Controle de Pausas</div>
+        <div style="font-size: 11px; color: #6b727c; font-weight: 500; white-space: nowrap;">Gestão operacional</div>
+      </div>
+    </div>
+
+    <div style="{{ sectionLabelStyle }}">NAVEGAÇÃO</div>
+    <nav style="display: flex; flex-direction: column; gap: 3px;">
+      <button onClick="{{ goPausaView }}" title="Em pausa" style="{{ navPausaStyle }}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 17px;"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        <span style="{{ navTextStyle }}">Em pausa</span>
+        <span style="{{ pauseBadgeStyle }}">{{ kpis.onPause }}</span>
+      </button>
+      <button onClick="{{ goTrabView }}" title="Trabalhando" style="{{ navTrabStyle }}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 17px;"><path d="M20 6 9 17l-5-5"/></svg>
+        <span style="{{ navTextStyle }}">Trabalhando</span>
+        <span style="{{ workBadgeStyle }}">{{ kpis.working }}</span>
+      </button>
+      <button onClick="{{ goImport }}" title="Importação Excel" style="{{ navImpStyle }}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 17px;"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
+        <span style="{{ navTextStyle }}">Importação Excel</span>
+      </button>
+      <button onClick="{{ goHistorico }}" title="Histórico" style="{{ navHistStyle }}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 17px;"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 8v4l3 2"/></svg>
+        <span style="{{ navTextStyle }}">Histórico</span>
+      </button>
+    </nav>
+
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
+      <button onClick="{{ openCadastro }}" title="Novo funcionário" style="{{ newBtnStyle }}" style-hover="background: #5c98f8;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="flex: 0 0 16px;"><path d="M12 5v14M5 12h14"/></svg>
+        <span style="{{ navTextStyle }}">Novo funcionário</span>
+      </button>
+      <div style="{{ offlineRowStyle }}">
+        <span style="width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: #2fbf71; box-shadow: 0 0 0 3px rgba(47,191,113,.18);"></span>
+        <div style="{{ offlineTextStyle }}"><div style="font-weight: 600; color: #d6d9de; white-space: nowrap;">Modo offline</div><div style="color: #6b727c; white-space: nowrap;">Dados salvos localmente</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Toggle recolher/expandir — alça na borda direita da sidebar -->
+  <button onClick="{{ toggleMenu }}" title="{{ toggleTitle }}" class="cp-nodrag" style="{{ toggleBtnStyle }}" style-hover="background: #1c1f26; color: #e6e8eb; border-color: #3a414b;">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{{ toggleIconStyle }}"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+
+  <!-- MAIN -->
+  <main style="flex: 1; min-width: 0; display: flex; flex-direction: column; background: #0c0d10;">
+    <!-- TOPBAR -->
+    <header class="cp-drag" style="display: flex; align-items: center; gap: 16px; padding: 16px 26px; border-bottom: 1px solid #1c1f25; background: rgba(12,13,16,.85); backdrop-filter: blur(8px);">
+      <div style="flex: 1; min-width: 0;">
+        <div style="font-size: 19px; font-weight: 700; letter-spacing: -.3px;">{{ screenTitle }}</div>
+        <div style="font-size: 12.5px; color: #6b727c; margin-top: 1px;">{{ screenSubtitle }}</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; padding: 7px 13px; border-radius: 9px; background: #121419; border: 1px solid #1c1f25; font-size: 12.5px; color: #9aa1ab;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        {{ todayStr }}
+      </div>
+      <div style="display: flex; align-items: center; gap: 9px; padding-left: 6px;">
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(140deg,#a78bfa,#7c5cf0); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff;">SC</div>
+        <div style="display: flex; gap: 3px; padding-left: 4px;">
+          <button onClick="{{ winMinimize }}" title="Minimizar" class="cp-winbtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg></button>
+          <button onClick="{{ winMaximize }}" title="Maximizar" class="cp-winbtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg></button>
+          <button onClick="{{ winClose }}" title="Fechar" class="cp-winbtn cp-winclose"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+      </div>
+    </header>
+
+    <div style="flex: 1; overflow-y: auto; padding: 24px 26px 40px;">
+
+      <!-- ============ LISTA (Em pausa / Trabalhando) ============ -->
+      <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+      <section data-screen-label="Lista por status">
+        <!-- KPIs -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px;">
+          <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 14px; padding: 17px 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <span style="font-size: 12.5px; color: #9aa1ab; font-weight: 500;">Trabalhando</span>
+              <span style="width: 30px; height: 30px; border-radius: 8px; background: rgba(47,191,113,.14); display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2fbf71" stroke-width="2.2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            </div>
+            <div style="font-size: 30px; font-weight: 700; letter-spacing: -1px; font-variant-numeric: tabular-nums;">{{ kpis.working }}</div>
+            <div style="font-size: 11.5px; color: #6b727c; margin-top: 2px;">de {{ kpis.total }} funcionários</div>
+          </div>
+          <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 14px; padding: 17px 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <span style="font-size: 12.5px; color: #9aa1ab; font-weight: 500;">Em pausa</span>
+              <span style="width: 30px; height: 30px; border-radius: 8px; background: rgba(234,179,8,.14); display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2.2" stroke-linecap="round"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></span>
+            </div>
+            <div style="font-size: 30px; font-weight: 700; letter-spacing: -1px; font-variant-numeric: tabular-nums; color: #f5c542;">{{ kpis.onPause }}</div>
+            <div style="font-size: 11.5px; color: #6b727c; margin-top: 2px;">colaboradores agora</div>
+          </div>
+          <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 14px; padding: 17px 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <span style="font-size: 12.5px; color: #9aa1ab; font-weight: 500;">Total</span>
+              <span style="width: 30px; height: 30px; border-radius: 8px; background: rgba(79,142,247,.14); display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></span>
+            </div>
+            <div style="font-size: 30px; font-weight: 700; letter-spacing: -1px; font-variant-numeric: tabular-nums;">{{ kpis.total }}</div>
+            <div style="font-size: 11.5px; color: #6b727c; margin-top: 2px;">cadastrados</div>
+          </div>
+          <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 14px; padding: 17px 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <span style="font-size: 12.5px; color: #9aa1ab; font-weight: 500;">Tempo médio de pausa</span>
+              <span style="width: 30px; height: 30px; border-radius: 8px; background: rgba(167,139,250,.14); display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            </div>
+            <div style="font-size: 30px; font-weight: 700; letter-spacing: -1px; font-family: 'JetBrains Mono', monospace;">{{ kpis.avgPause }}</div>
+            <div style="font-size: 11.5px; color: #6b727c; margin-top: 2px;">restante nas pausas ativas</div>
+          </div>
+        </div>
+
+        <!-- Toolbar + Table card -->
+        <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 16px; overflow: hidden;">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 15px 18px; border-bottom: 1px solid #1c1f25; flex-wrap: wrap;">
+            <div style="position: relative; flex: 1; min-width: 220px; max-width: 340px;">
+              <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b727c" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input value="{{ search }}" onInput="{{ setSearch }}" placeholder="Buscar por nome ou CPF..." style="width: 100%; padding: 9px 12px 9px 34px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13px; outline: none;" style-focus="border-color: #4f8ef7; box-shadow: 0 0 0 3px rgba(79,142,247,.14);">
+            </div>
+            <div style="flex: 1;"></div>
+            <button onClick="{{ goImport }}" style="display: flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13px; font-weight: 500; cursor: pointer;" style-hover="border-color: #3a414b; background: #16181d;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
+              Importar
+            </button>
+          </div>
+
+          <!-- Grid sub-toolbar -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 11px 18px; border-bottom: 1px solid #1c1f25; background: #0e0f12;">
+            <div style="color: #7a818b; font-size: 11px; font-weight: 700; letter-spacing: .5px;">{{ listLabel }}</div>
+            <button onClick="{{ toggleSort }}" style="display: flex; align-items: center; gap: 6px; background: #121419; border: 1px solid #23272e; color: #9aa1ab; font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 11px; border-radius: 8px;" style-hover="border-color: #3a414b; color: #d6d9de;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 18V4"/></svg>
+              Nome {{ sortArrow }}
+            </button>
+          </div>
+
+          <!-- Skeleton grid -->
+          <sc-if value="{{ loading }}" hint-placeholder-val="{{ true }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)); gap: 14px; padding: 18px;">
+              <sc-for list="{{ skeleton }}" as="s" hint-placeholder-count="8">
+                <div style="background: #0e0f12; border: 1px solid #1c1f25; border-radius: 14px; padding: 16px;">
+                  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;"><div style="width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(90deg,#1a1d22,#23272e,#1a1d22); background-size: 800px 100%; animation: cp-shimmer 1.4s infinite linear;"></div><div style="flex:1;"><div style="height: 12px; width: 70%; border-radius: 5px; background: linear-gradient(90deg,#1a1d22,#23272e,#1a1d22); background-size: 800px 100%; animation: cp-shimmer 1.4s infinite linear; margin-bottom: 7px;"></div><div style="height: 10px; width: 40%; border-radius: 5px; background: linear-gradient(90deg,#1a1d22,#23272e,#1a1d22); background-size: 800px 100%; animation: cp-shimmer 1.4s infinite linear;"></div></div></div>
+                  <div style="height: 40px; border-radius: 9px; background: linear-gradient(90deg,#1a1d22,#23272e,#1a1d22); background-size: 800px 100%; animation: cp-shimmer 1.4s infinite linear; margin-bottom: 14px;"></div>
+                  <div style="height: 36px; border-radius: 9px; background: linear-gradient(90deg,#1a1d22,#23272e,#1a1d22); background-size: 800px 100%; animation: cp-shimmer 1.4s infinite linear;"></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <!-- Grid cards -->
+          <sc-if value="{{ showRows }}" hint-placeholder-val="{{ false }}">
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)); gap: 14px; padding: 18px;">
+            <sc-for list="{{ rows }}" as="row" hint-placeholder-count="6">
+              <div style="{{ row.cardStyle }}" style-hover="border-color: #3a414b;">
+                <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 15px;">
+                  <div style="{{ row.avatarLg }}">{{ row.initials }}</div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 14.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.name }}</div>
+                    <div style="font-size: 12px; color: #6b727c;">{{ row.role }}</div>
+                  </div>
+                  <span style="{{ row.statusStyle }}"><span style="{{ row.dotStyle }}"></span>{{ row.statusLabel }}</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #1c1f25; border: 1px solid #1c1f25; border-radius: 10px; overflow: hidden; margin-bottom: 13px;">
+                  <div style="background: #101216; padding: 9px 12px;"><div style="font-size: 10px; font-weight: 700; letter-spacing: .5px; color: #565d67; margin-bottom: 3px;">CPF</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #c5c9cf;">{{ row.cpf }}</div></div>
+                  <div style="background: #101216; padding: 9px 12px;"><div style="font-size: 10px; font-weight: 700; letter-spacing: .5px; color: #565d67; margin-bottom: 3px;">JORNADA</div><div style="font-size: 12.5px; color: #c5c9cf;">{{ row.jornada }}</div></div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                  <div>
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: .5px; color: #565d67; margin-bottom: 3px;">{{ row.metaLabel }}</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: {{ row.timerColor }};">{{ row.metaValue }}</div>
+                  </div>
+                  <sc-if value="{{ row.isPause }}" hint-placeholder-val="{{ false }}">
+                    <div style="width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(234,179,8,.12);"><span style="width: 8px; height: 8px; border-radius: 50%; background: #f5c542; animation: cp-pulse 1.6s infinite;"></span></div>
+                  </sc-if>
+                </div>
+                <button onClick="{{ row.onAction }}" disabled="{{ row.actionDisabled }}" style="{{ row.actionStyle }}">{{ row.actionLabel }}</button>
+              </div>
+            </sc-for>
+          </div>
+          </sc-if>
+
+          <!-- Empty state -->
+          <sc-if value="{{ showEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center;">
+              <div style="width: 60px; height: 60px; border-radius: 16px; background: #16181d; border: 1px solid #23272e; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5b626c" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
+              <div style="font-size: 15px; font-weight: 600; margin-bottom: 5px;">{{ emptyTitle }}</div>
+              <div style="font-size: 13px; color: #6b727c; max-width: 320px;">{{ emptySubtitle }}</div>
+            </div>
+          </sc-if>
+
+          <!-- Pagination -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-top: 1px solid #1c1f25;">
+            <div style="font-size: 12.5px; color: #6b727c;">Mostrando <span style="color: #c5c9cf; font-weight: 600;">{{ visibleCount }}</span> de {{ kpis.total }}</div>
+            <div style="display: flex; gap: 6px;">
+              <button disabled="{{ true }}" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #23272e; background: #0e0f12; color: #4a505a; cursor: not-allowed;">‹</button>
+              <button style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #4f8ef7; background: rgba(79,142,247,.14); color: #6aa8ff; font-weight: 600; cursor: pointer;">1</button>
+              <button style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #23272e; background: #0e0f12; color: #9aa1ab; cursor: pointer;" style-hover="border-color: #3a414b;">2</button>
+              <button style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #23272e; background: #0e0f12; color: #9aa1ab; cursor: pointer;" style-hover="border-color: #3a414b;">›</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      </sc-if>
+
+      <!-- ============ IMPORTAÇÃO EXCEL ============ -->
+      <sc-if value="{{ isImport }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Importação Excel" style="max-width: 780px; margin: 0 auto;">
+
+        <sc-if value="{{ importIdle }}" hint-placeholder-val="{{ true }}">
+          <div onDragOver="{{ onDragOver }}" onDrop="{{ onDropFile }}" onClick="{{ onSelectFile }}" style="{{ dropStyle }}">
+            <div style="width: 64px; height: 64px; border-radius: 18px; background: rgba(79,142,247,.12); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></div>
+            <div style="font-size: 16.5px; font-weight: 600; margin-bottom: 6px;">Arraste sua planilha aqui</div>
+            <div style="font-size: 13px; color: #6b727c; margin-bottom: 20px;">Formatos aceitos: .xlsx, .xls, .csv · até 5&nbsp;MB</div>
+            <button style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; border: none; background: #4f8ef7; color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer;">Selecionar arquivo</button>
+            <div style="margin-top: 22px; font-size: 12px; color: #565d67;">Colunas esperadas: <span style="font-family:'JetBrains Mono',monospace; color:#8a919b;">Nome · CPF · Jornada</span></div>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 16px; padding: 14px 16px; background: #121419; border: 1px solid #1c1f25; border-radius: 12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" stroke-width="2" stroke-linecap="round" style="flex-shrink:0; margin-top:1px;"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+            <div style="font-size: 12.5px; color: #9aa1ab; line-height: 1.5;">Baixe o <a href="#">modelo de planilha</a> para garantir que as colunas estejam no formato correto. O CPF deve conter 11 dígitos.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ importPreview }}" hint-placeholder-val="{{ false }}">
+          <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 16px; padding: 22px;">
+            <div style="display: flex; align-items: center; gap: 14px; padding-bottom: 20px; border-bottom: 1px solid #1c1f25; margin-bottom: 20px;">
+              <div style="width: 46px; height: 46px; border-radius: 11px; background: rgba(47,191,113,.14); display: flex; align-items: center; justify-content: center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2fbf71" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 13 2 2 4-4"/></svg></div>
+              <div style="flex: 1;"><div style="font-size: 14.5px; font-weight: 600;">{{ importFileName }}</div><div style="font-size: 12px; color: #6b727c;">{{ importFileSize }} · {{ importFileRows }} linhas detectadas</div></div>
+              <button onClick="{{ onResetImport }}" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #23272e; background: #0e0f12; color: #9aa1ab; font-size: 12.5px; cursor: pointer;" style-hover="border-color:#3a414b;">Trocar</button>
+            </div>
+            <div style="font-size: 12.5px; font-weight: 600; color: #9aa1ab; margin-bottom: 12px;">Validação prévia</div>
+            <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 22px;">
+              <div style="background:#0e0f12; border:1px solid #1c1f25; border-radius:11px; padding:13px;"><div style="font-size:22px;font-weight:700;color:#2fbf71;font-variant-numeric:tabular-nums;">{{ prev.valid }}</div><div style="font-size:11.5px;color:#6b727c;">Válidos</div></div>
+              <div style="background:#0e0f12; border:1px solid #1c1f25; border-radius:11px; padding:13px;"><div style="font-size:22px;font-weight:700;color:#f5c542;font-variant-numeric:tabular-nums;">{{ prev.duplicate }}</div><div style="font-size:11.5px;color:#6b727c;">Duplicados</div></div>
+              <div style="background:#0e0f12; border:1px solid #1c1f25; border-radius:11px; padding:13px;"><div style="font-size:22px;font-weight:700;color:#ef4444;font-variant-numeric:tabular-nums;">{{ prev.invalid }}</div><div style="font-size:11.5px;color:#6b727c;">Inválidos</div></div>
+              <div style="background:#0e0f12; border:1px solid #1c1f25; border-radius:11px; padding:13px;"><div style="font-size:22px;font-weight:700;color:#e6e8eb;font-variant-numeric:tabular-nums;">{{ importFileRows }}</div><div style="font-size:11.5px;color:#6b727c;">Total</div></div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+              <button onClick="{{ onResetImport }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13.5px; font-weight: 500; cursor: pointer;" style-hover="border-color:#3a414b;">Cancelar</button>
+              <button onClick="{{ onStartImport }}" style="padding: 10px 20px; border-radius: 10px; border: none; background: #4f8ef7; color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer;" style-hover="background:#5c98f8;">Importar {{ prev.valid }} registros</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ importRunning }}" hint-placeholder-val="{{ false }}">
+          <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 16px; padding: 40px 28px; text-align: center;">
+            <div style="width: 52px; height: 52px; border-radius: 50%; border: 3px solid #23272e; border-top-color: #4f8ef7; margin: 0 auto 20px; animation: cp-spin .8s linear infinite;"></div>
+            <div style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Importando registros...</div>
+            <div style="font-size: 13px; color: #6b727c; margin-bottom: 22px;">Validando e salvando localmente</div>
+            <div style="max-width: 420px; margin: 0 auto;">
+              <div style="height: 9px; border-radius: 8px; background: #0e0f12; border: 1px solid #1c1f25; overflow: hidden;"><div style="{{ progressBarStyle }}"></div></div>
+              <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #9aa1ab; font-family: 'JetBrains Mono', monospace;"><span>{{ importProgress }}%</span><span>{{ importFileRows }} linhas</span></div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ importDone }}" hint-placeholder-val="{{ false }}">
+          <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 16px; padding: 26px;">
+            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 24px;">
+              <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(47,191,113,.14); display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2fbf71" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div><div style="font-size: 16.5px; font-weight: 700;">Importação concluída</div><div style="font-size: 13px; color: #6b727c;">Relatório do processamento de {{ importFileName }}</div></div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 22px;">
+              <div style="background:#0e0f12; border:1px solid #1c3320; border-radius:12px; padding:15px;"><div style="font-size:26px;font-weight:700;color:#2fbf71;font-variant-numeric:tabular-nums;">{{ prev.valid }}</div><div style="font-size:12px;color:#8a919b;margin-top:2px;">Importados</div></div>
+              <div style="background:#0e0f12; border:1px solid #3a3110; border-radius:12px; padding:15px;"><div style="font-size:26px;font-weight:700;color:#f5c542;font-variant-numeric:tabular-nums;">{{ prev.duplicate }}</div><div style="font-size:12px;color:#8a919b;margin-top:2px;">Duplicados (ignorados)</div></div>
+              <div style="background:#0e0f12; border:1px solid #3a1a1a; border-radius:12px; padding:15px;"><div style="font-size:26px;font-weight:700;color:#ef4444;font-variant-numeric:tabular-nums;">{{ prev.invalid }}</div><div style="font-size:12px;color:#8a919b;margin-top:2px;">Inválidos</div></div>
+              <div style="background:#0e0f12; border:1px solid #1c1f25; border-radius:12px; padding:15px;"><div style="font-size:26px;font-weight:700;color:#e6e8eb;font-variant-numeric:tabular-nums;">{{ importFileRows }}</div><div style="font-size:12px;color:#8a919b;margin-top:2px;">Total processado</div></div>
+            </div>
+            <div style="font-size: 12.5px; font-weight: 600; color: #9aa1ab; margin-bottom: 10px;">Ocorrências encontradas</div>
+            <div style="border: 1px solid #1c1f25; border-radius: 12px; overflow: hidden; margin-bottom: 22px;">
+              <sc-for list="{{ importIssues }}" as="iss" hint-placeholder-count="4">
+                <div style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-bottom: 1px solid #16181d;">
+                  <span style="{{ iss.tagStyle }}">{{ iss.tag }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#6b727c;">Linha {{ iss.line }}</span>
+                  <span style="font-size:12.5px; color:#c5c9cf; flex:1;">{{ iss.msg }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+              <button onClick="{{ onResetImport }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13.5px; font-weight: 500; cursor: pointer;" style-hover="border-color:#3a414b;">Nova importação</button>
+              <button onClick="{{ onFinishImport }}" style="padding: 10px 20px; border-radius: 10px; border: none; background: #4f8ef7; color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer;" style-hover="background:#5c98f8;">Ver funcionários</button>
+            </div>
+          </div>
+        </sc-if>
+      </section>
+      </sc-if>
+
+      <!-- ============ HISTÓRICO ============ -->
+      <sc-if value="{{ isHistorico }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Histórico">
+        <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 16px; overflow: hidden;">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 15px 18px; border-bottom: 1px solid #1c1f25; flex-wrap: wrap;">
+            <div style="position: relative; flex: 1; min-width: 220px; max-width: 320px;">
+              <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b727c" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input value="{{ histSearch }}" onInput="{{ setHistSearch }}" placeholder="Buscar funcionário..." style="width: 100%; padding: 9px 12px 9px 34px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13px; outline: none;" style-focus="border-color: #4f8ef7; box-shadow: 0 0 0 3px rgba(79,142,247,.14);">
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button onClick="{{ histHoje }}" style="{{ histChipHoje }}">Hoje</button>
+              <button onClick="{{ hist7 }}" style="{{ histChip7 }}">7 dias</button>
+              <button onClick="{{ hist30 }}" style="{{ histChip30 }}">30 dias</button>
+            </div>
+            <div style="flex: 1;"></div>
+            <button disabled="{{ true }}" title="Em breve" style="display: flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 9px; border: 1px solid #1c1f25; background: #0e0f12; color: #4a505a; font-size: 13px; font-weight: 500; cursor: not-allowed;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+              Exportar
+            </button>
+          </div>
+          <div style="display: grid; grid-template-columns: 2fr 1.4fr 1fr 0.9fr 0.9fr 1fr; gap: 12px; padding: 11px 18px; border-bottom: 1px solid #1c1f25; background: #0e0f12;">
+            <div style="color: #7a818b; font-size: 11px; font-weight: 700; letter-spacing: .5px;">FUNCIONÁRIO</div>
+            <div style="color: #7a818b; font-size: 11px; font-weight: 700; letter-spacing: .5px;">TIPO DE PAUSA</div>
+            <div style="color: #7a818b; font-size: 11px; font-weight: 700; letter-spacing: .5px;">DATA</div>
+            <div style="color: #7a818b; font-size: 11px; font-weight: 700; letter-spacing: .5px;">INÍCIO</div>
+            <div style="color: #7a818b; font-size: 11px; font-weight: 700; letter-spacing: .5px;">FIM</div>
+            <div style="color: #7a818b; font-size: 11px; font-weight: 700; letter-spacing: .5px; text-align:right;">DURAÇÃO</div>
+          </div>
+          <sc-for list="{{ historyRows }}" as="h" hint-placeholder-count="10">
+            <div style="display: grid; grid-template-columns: 2fr 1.4fr 1fr 0.9fr 0.9fr 1fr; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #16181d; align-items: center;" style-hover="background:#16181d;">
+              <div style="display: flex; align-items: center; gap: 11px;"><div style="{{ h.avatarStyle }}">{{ h.initials }}</div><span style="font-size: 13.5px; font-weight: 600;">{{ h.name }}</span></div>
+              <div><span style="{{ h.tagStyle }}">{{ h.type }}</span></div>
+              <div style="font-size: 13px; color: #9aa1ab;">{{ h.date }}</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size: 12.5px; color: #c5c9cf;">{{ h.start }}</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size: 12.5px; color: #c5c9cf;">{{ h.end }}</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size: 13px; font-weight: 600; text-align:right; color: {{ h.durColor }};">{{ h.duration }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ histEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 50px; text-align: center; color: #6b727c; font-size: 13.5px;">Nenhum registro encontrado para esse período.</div>
+          </sc-if>
+        </div>
+      </section>
+      </sc-if>
+
+    </div>
+  </main>
+
+  <!-- ============ CADASTRO MODAL ============ -->
+  <sc-if value="{{ cadastroOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeCadastro }}" style="position: fixed; inset: 0; background: rgba(5,6,8,.68); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 100; animation: cp-fadeIn .16s ease;">
+      <div onClick="{{ stop }}" style="width: 460px; max-width: calc(100vw - 40px); background: #16181d; border: 1px solid #262a30; border-radius: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.6); animation: cp-modalIn .22s cubic-bezier(.2,.8,.2,1); overflow: hidden;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; border-bottom: 1px solid #23272e;">
+          <div><div style="font-size: 16.5px; font-weight: 700;">Novo funcionário</div><div style="font-size: 12.5px; color: #6b727c; margin-top: 1px;">Cadastro manual</div></div>
+          <button onClick="{{ closeCadastro }}" style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #9aa1ab; cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="border-color:#3a414b; color:#e6e8eb;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        </div>
+        <div style="padding: 22px;">
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 12.5px; font-weight: 600; color: #c5c9cf; margin-bottom: 7px;">Nome completo</label>
+            <input value="{{ form.nome }}" onInput="{{ setNome }}" placeholder="Ex.: Maria Silva" style="width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13.5px; outline: none;" style-focus="border-color:#4f8ef7; box-shadow:0 0 0 3px rgba(79,142,247,.14);">
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 12.5px; font-weight: 600; color: #c5c9cf; margin-bottom: 7px;">CPF</label>
+            <input value="{{ form.cpf }}" onInput="{{ setCpf }}" placeholder="000.000.000-00" style="width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13.5px; outline: none; font-family: 'JetBrains Mono', monospace;" style-focus="border-color:#4f8ef7; box-shadow:0 0 0 3px rgba(79,142,247,.14);">
+          </div>
+          <div style="margin-bottom: 4px;">
+            <label style="display: block; font-size: 12.5px; font-weight: 600; color: #c5c9cf; margin-bottom: 7px;">Tipo de jornada</label>
+            <select value="{{ form.jornada }}" onChange="{{ setJornada }}" style="width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13.5px; outline: none; cursor: pointer;" style-focus="border-color:#4f8ef7;">
+              <option value="6h">6h — 1 pausa de 15 min</option>
+              <option value="8h">8h — 2 pausas de 15 min + almoço 1h</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 16px 22px; border-top: 1px solid #23272e; background: #121419;">
+          <button onClick="{{ closeCadastro }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13.5px; font-weight: 500; cursor: pointer;" style-hover="border-color:#3a414b;">Cancelar</button>
+          <button onClick="{{ saveCadastro }}" disabled="{{ saveDisabled }}" style="{{ saveBtnStyle }}">Salvar funcionário</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ CONFIRMAÇÃO DE PAUSA ============ -->
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeConfirm }}" style="position: fixed; inset: 0; background: rgba(5,6,8,.68); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 120; animation: cp-fadeIn .16s ease;">
+      <div onClick="{{ stop }}" style="width: 420px; max-width: calc(100vw - 40px); background: #16181d; border: 1px solid #262a30; border-radius: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.6); animation: cp-modalIn .22s cubic-bezier(.2,.8,.2,1); overflow: hidden;">
+        <div style="padding: 24px 22px 20px; display: flex; gap: 14px; align-items: flex-start;">
+          <div style="{{ confirmIconStyle }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div style="flex: 1;">
+            <div style="font-size: 16.5px; font-weight: 700; margin-bottom: 6px;">{{ confirmTitle }}</div>
+            <div style="font-size: 13.5px; color: #9aa1ab; line-height: 1.45;">{{ confirmMsg }}</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 16px 22px; border-top: 1px solid #23272e; background: #121419;">
+          <button onClick="{{ closeConfirm }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13.5px; font-weight: 500; cursor: pointer;" style-hover="border-color:#3a414b;">Cancelar</button>
+          <button onClick="{{ doConfirm }}" style="{{ confirmBtnStyle }}">{{ confirmBtnLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ TOASTS ============ -->
+  <div style="position: fixed; bottom: 22px; right: 22px; display: flex; flex-direction: column; gap: 10px; z-index: 200;">
+    <sc-for list="{{ toasts }}" as="t" hint-placeholder-count="0">
+      <div style="{{ t.style }}">
+        <span style="{{ t.iconWrap }}">{{ t.icon }}</span>
+        <div style="flex: 1;"><div style="font-size: 13px; font-weight: 600; color: #e6e8eb;">{{ t.title }}</div><div style="font-size: 12px; color: #9aa1ab; margin-top: 1px;">{{ t.msg }}</div></div>
+        <button onClick="{{ t.onClose }}" style="background: none; border: none; color: #6b727c; cursor: pointer; padding: 2px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;100%&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'pausa',
+    menuCollapsed: false,
+    search: '',
+    filter: 'todos',
+    sortDir: 'asc',
+    loading: true,
+    now: Date.now(),
+    employees: this.buildEmployees(),
+    cadastroOpen: false,
+    confirm: null, // { id, action: 'start' | 'finish', name }
+    form: { nome: '', cpf: '', jornada: '6h' },
+    importStage: 'idle',
+    importProgress: 0,
+    importFile: null,
+    dragOver: false,
+    histSearch: '',
+    histPeriod: '7',
+    toasts: [],
+    _toastId: 1,
+  };
+
+  componentDidMount() {
+    setTimeout(() => this.setState({ loading: false }), 950);
+    this._timer = setInterval(() => {
+      const now = Date.now();
+      let expired = [];
+      const employees = this.state.employees.map(e => {
+        if (e.status === 'pause' && e.pauseEndsAt <= now) {
+          expired.push(e.name);
+          return { ...e, status: 'working', pauseType: null, pauseEndsAt: null, pauseTotal: null };
+        }
+        return e;
+      });
+      if (expired.length) {
+        this.setState({ employees, now });
+        expired.forEach(n => this.toast('ok', 'Pausa concluída', n + ' voltou a trabalhar'));
+      } else {
+        this.setState({ now });
+      }
+    }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this._timer); }
+
+  buildEmployees() {
+    const base = Date.now();
+    const palette = ['#4f8ef7','#2fbf71','#f5c542','#a78bfa','#f472b6','#22d3ee','#fb923c','#60a5fa','#34d399','#e879f9'];
+    const roles = ['Atendimento','Suporte N1','Retenção','Vendas','Backoffice','Cobrança','Ativo','Ouvidoria'];
+    const names = ['Ana Souza','Bruno Lima','Carla Mendes','Diego Rocha','Eduarda Alves','Felipe Castro','Gabriela Nunes','Henrique Dias','Isabela Ramos','João Pereira','Karina Melo','Lucas Barbosa','Mariana Costa','Nelson Farias','Olívia Teixeira','Paulo Cardoso','Rafael Moreira','Sabrina Lopes','Thiago Azevedo','Vitor Andrade','Wesley Pinto','Yara Ribeiro','Amanda Freitas','Camila Duarte','Rodrigo Prado','Larissa Vieira','Marcos Antunes','Patrícia Gomes'];
+    const list = names.map((n, i) => {
+      const j = (i % 3 === 0) ? '6h' : '8h';
+      const allowed = j === '6h' ? 1 : 3;
+      return {
+        id: i + 1, name: n, role: roles[i % roles.length],
+        cpf: this.fakeCpf(i), jornada: j, allowed, used: 0,
+        status: 'working', color: palette[i % palette.length],
+        nextPauseAt: this.timeStr(9 + (i % 6), (i * 13) % 60),
+      };
+    });
+    const pauses = [
+      { idx: 1, type: 'Descanso', total: 900, remaining: 512 },
+      { idx: 4, type: 'Almoço', total: 3600, remaining: 1874 },
+      { idx: 9, type: 'Descanso', total: 900, remaining: 138 },
+      { idx: 14, type: 'Descanso', total: 900, remaining: 741 },
+      { idx: 20, type: 'Almoço', total: 3600, remaining: 2337 },
+    ];
+    pauses.forEach(p => {
+      const e = list[p.idx];
+      if (e) { e.status = 'pause'; e.pauseType = p.type; e.pauseTotal = p.total; e.pauseEndsAt = base + p.remaining * 1000; e.used = 1; }
+    });
+    [6, 17].forEach(idx => { if (list[idx]) list[idx].used = list[idx].allowed; });
+    return list;
+  }
+  fakeCpf(i) {
+    const s = String(100000000 + i * 7654321).slice(0, 9).padStart(9, '0');
+    return s.slice(0,3) + '.' + s.slice(3,6) + '.' + s.slice(6,9) + '-' + String((i * 31) % 100).padStart(2, '0');
+  }
+  timeStr(h, m) { return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0'); }
+  initials(n) { const p = n.trim().split(' '); return (p[0][0] + (p[p.length-1][0] || '')).toUpperCase(); }
+  fmt(secs) { secs = Math.max(0, secs); const m = Math.floor(secs / 60); const s = secs % 60; return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0'); }
+  avatarStyle(color, size) {
+    size = size || 32;
+    return { width: size+'px', height: size+'px', flex: '0 0 '+size+'px', borderRadius: '50%', background: color + '22', color: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: (size*0.36)+'px', fontWeight: 700, border: '1px solid ' + color + '44' };
+  }
+
+  toast(kind, title, msg) {
+    // No app desktop (Electron): notifica APENAS pelo Windows (toast nativo),
+    // sem exibir o toast interno.
+    if (window.electronAPI && window.electronAPI.notify) {
+      try { window.electronAPI.notify(title, msg, kind); } catch (e) {}
+      return;
+    }
+    // Fallback (rodando no navegador, sem Electron): mostra o toast interno.
+    const id = this.state._toastId;
+    this.setState(s => ({ toasts: [...s.toasts, { id, kind, title, msg }], _toastId: s._toastId + 1 }));
+    setTimeout(() => this.setState(s => ({ toasts: s.toasts.filter(t => t.id !== id) })), 4200);
+  }
+
+  // Abre o dialog de confirmação antes de iniciar/finalizar uma pausa.
+  askConfirm(id, action) {
+    const emp = this.state.employees.find(e => e.id === id);
+    if (!emp) return;
+    this.setState({ confirm: { id, action, name: emp.name } });
+  }
+  runConfirm() {
+    const c = this.state.confirm;
+    if (!c) return;
+    if (c.action === 'start') this.startPause(c.id);
+    else this.finishPause(c.id);
+    this.setState({ confirm: null });
+  }
+
+  startPause(id) {
+    this.setState(s => ({
+      employees: s.employees.map(e => {
+        if (e.id !== id || e.status === 'pause' || (e.allowed - e.used) <= 0) return e;
+        const type = (e.jornada === '8h' && e.used === 0) ? 'Almoço' : 'Descanso';
+        const total = type === 'Almoço' ? 3600 : 900;
+        return { ...e, status: 'pause', pauseType: type, pauseTotal: total, pauseEndsAt: Date.now() + total * 1000, used: e.used + 1 };
+      }),
+    }));
+    const emp = this.state.employees.find(e => e.id === id);
+    if (emp) this.toast('warn', 'Pausa iniciada', emp.name + ' entrou em pausa');
+  }
+  finishPause(id) {
+    const emp = this.state.employees.find(e => e.id === id);
+    this.setState(s => ({ employees: s.employees.map(e => e.id === id ? { ...e, status: 'working', pauseType: null, pauseEndsAt: null, pauseTotal: null } : e) }));
+    if (emp) this.toast('ok', 'Pausa finalizada', emp.name + ' voltou a trabalhar');
+  }
+
+  // ---- import flow ----
+  simulateFile() { this.setState({ importStage: 'preview', importFile: { name: 'funcionarios_novembro.xlsx', size: '48 KB', rows: 42, valid: 38, duplicate: 2, invalid: 2 } }); }
+  runImport() {
+    this.setState({ importStage: 'running', importProgress: 0 });
+    const iv = setInterval(() => {
+      this.setState(s => {
+        const p = Math.min(100, s.importProgress + Math.round(6 + Math.random() * 10));
+        if (p >= 100) { clearInterval(iv); setTimeout(() => this.setState({ importStage: 'report' }), 400); }
+        return { importProgress: p };
+      });
+    }, 180);
+  }
+  saveCadastro() {
+    const f = this.state.form;
+    if (!f.nome.trim() || f.cpf.replace(/\D/g,'').length < 11) return;
+    const allowed = f.jornada === '6h' ? 1 : 3;
+    const palette = ['#4f8ef7','#2fbf71','#f5c542','#a78bfa','#f472b6','#22d3ee','#fb923c'];
+    const emp = { id: Date.now(), name: f.nome.trim(), role: 'Novo cadastro', cpf: f.cpf, jornada: f.jornada, allowed, used: 0, status: 'working', color: palette[Math.floor(Math.random()*palette.length)], nextPauseAt: 'Disponível' };
+    this.setState(s => ({ employees: [emp, ...s.employees], cadastroOpen: false, form: { nome: '', cpf: '', jornada: '6h' } }));
+    this.toast('ok', 'Funcionário cadastrado', f.nome.trim() + ' foi adicionado');
+  }
+
+  chip(active) {
+    const base = { padding: '7px 13px', borderRadius: '8px', fontSize: '12.5px', fontWeight: 600, cursor: 'pointer', border: '1px solid ', transition: 'all .12s' };
+    return active
+      ? { ...base, borderColor: '#4f8ef7', background: 'rgba(79,142,247,.14)', color: '#6aa8ff' }
+      : { ...base, borderColor: '#23272e', background: '#0e0f12', color: '#9aa1ab' };
+  }
+
+  renderVals() {
+    const st = this.state;
+    const now = st.now;
+    const emps = st.employees;
+    const scr = st.screen;
+    // Cada tela de lista é um filtro de status: 'trab' = trabalhando, 'pausa' = em pausa.
+    const statusView = scr === 'trab' ? 'working' : 'pause';
+    const working = emps.filter(e => e.status === 'working').length;
+    const onPause = emps.filter(e => e.status === 'pause').length;
+    const pauseSecs = emps.filter(e => e.status === 'pause').map(e => Math.max(0, Math.round((e.pauseEndsAt - now) / 1000)));
+    const avg = pauseSecs.length ? Math.round(pauseSecs.reduce((a, b) => a + b, 0) / pauseSecs.length) : 0;
+
+    // Linhas da lista — filtradas pelo status da tela atual (Em pausa / Trabalhando).
+    let filtered = emps.filter(e => {
+      const q = st.search.trim().toLowerCase();
+      const matchQ = !q || e.name.toLowerCase().includes(q) || e.cpf.includes(q);
+      return matchQ && e.status === statusView;
+    });
+    filtered = filtered.slice().sort((a, b) => st.sortDir === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
+
+    const workBadge = { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, background: 'rgba(47,191,113,.13)', color: '#4ad991', border: '1px solid rgba(47,191,113,.25)' };
+    const pauseBadge = { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, background: 'rgba(234,179,8,.13)', color: '#f5c542', border: '1px solid rgba(234,179,8,.28)' };
+    const dot = c => ({ width: '6px', height: '6px', borderRadius: '50%', background: c });
+
+    const rows = filtered.map(e => {
+      const isPause = e.status === 'pause';
+      const left = e.allowed - e.used;
+      const rem = isPause ? Math.max(0, Math.round((e.pauseEndsAt - now) / 1000)) : 0;
+      let actionLabel, actionStyle, actionDisabled, onAction;
+      const btn = { width: '100%', padding: '9px 13px', borderRadius: '9px', fontSize: '13px', fontWeight: 600 };
+      if (isPause) {
+        actionLabel = 'Finalizar pausa'; actionDisabled = false; onAction = () => this.askConfirm(e.id, 'finish');
+        actionStyle = { ...btn, border: 'none', background: '#f5c542', color: '#1a1400', cursor: 'pointer' };
+      } else if (left > 0) {
+        actionLabel = 'Iniciar pausa'; actionDisabled = false; onAction = () => this.askConfirm(e.id, 'start');
+        actionStyle = { ...btn, border: '1px solid #2a5aa8', background: 'rgba(79,142,247,.14)', color: '#6aa8ff', cursor: 'pointer' };
+      } else {
+        actionLabel = 'Sem pausas disponíveis'; actionDisabled = true; onAction = () => {};
+        actionStyle = { ...btn, border: '1px solid #23272e', background: '#0e0f12', color: '#4a505a', cursor: 'not-allowed' };
+      }
+      const cardBorder = isPause ? '#3a3110' : '#1c1f25';
+      return {
+        id: e.id, name: e.name, role: e.role, cpf: e.cpf, jornada: e.jornada,
+        initials: this.initials(e.name), avatarStyle: this.avatarStyle(e.color), avatarLg: this.avatarStyle(e.color, 42),
+        isPause,
+        cardStyle: { background: '#101216', border: '1px solid ' + cardBorder, borderRadius: '14px', padding: '16px', transition: 'border-color .12s' },
+        statusLabel: isPause ? 'Em pausa' : 'Trabalhando',
+        statusStyle: isPause ? pauseBadge : workBadge,
+        dotStyle: dot(isPause ? '#f5c542' : '#2fbf71'),
+        metaLabel: isPause ? 'TEMPO RESTANTE' : 'PRÓXIMA PAUSA',
+        metaValue: isPause ? this.fmt(rem) : e.nextPauseAt,
+        timerColor: isPause ? (rem < 60 ? '#ef4444' : '#f5c542') : '#c5c9cf',
+        actionLabel, actionStyle, actionDisabled, onAction,
+      };
+    });
+
+    // import
+    const f = st.importFile || { name: '', size: '', rows: 0, valid: 0, duplicate: 0, invalid: 0 };
+    const importIssues = [
+      { tag: 'Inválido', tagStyle: this.tagStyle('#ef4444'), line: 14, msg: 'CPF com número de dígitos incorreto (10 dígitos)' },
+      { tag: 'Inválido', tagStyle: this.tagStyle('#ef4444'), line: 27, msg: 'Campo "Nome" vazio' },
+      { tag: 'Duplicado', tagStyle: this.tagStyle('#f5c542'), line: 31, msg: 'CPF já cadastrado no sistema' },
+      { tag: 'Duplicado', tagStyle: this.tagStyle('#f5c542'), line: 39, msg: 'CPF repetido dentro da planilha' },
+    ];
+
+    // history
+    const histNames = ['Ana Souza','Bruno Lima','Carla Mendes','Diego Rocha','João Pereira','Mariana Costa','Felipe Castro','Karina Melo','Lucas Barbosa','Olívia Teixeira','Rafael Moreira','Thiago Azevedo'];
+    const histColors = ['#4f8ef7','#2fbf71','#f5c542','#a78bfa','#f472b6','#22d3ee'];
+    const histData = histNames.map((n, i) => {
+      const type = i % 3 === 0 ? 'Almoço' : 'Descanso';
+      const sh = 8 + (i % 8), sm = (i * 11) % 60;
+      const dur = type === 'Almoço' ? 60 : 15;
+      const em = sm + dur; const eh = sh + Math.floor(em / 60);
+      const over = i % 5 === 0 && type === 'Descanso';
+      return {
+        name: n, initials: this.initials(n), avatarStyle: this.avatarStyle(histColors[i % histColors.length], 28),
+        type, tagStyle: type === 'Almoço' ? this.tagStyle('#a78bfa') : this.tagStyle('#4f8ef7'),
+        date: '0' + (5 - (i % 5)) + '/07', start: this.timeStr(sh, sm), end: this.timeStr(eh, em % 60),
+        duration: (over ? (dur + 3) : dur) + ':00', durColor: over ? '#ef4444' : '#c5c9cf',
+      };
+    });
+    const hq = st.histSearch.trim().toLowerCase();
+    const historyRows = histData.filter(h => !hq || h.name.toLowerCase().includes(hq));
+
+    // toasts
+    const toastColor = { ok: '#2fbf71', warn: '#f5c542', err: '#ef4444' };
+    const toastIcon = { ok: '✓', warn: '❚❚', err: '!' };
+    const toasts = st.toasts.map(t => ({
+      title: t.title, msg: t.msg,
+      icon: t.kind === 'warn' ? '‖' : (t.kind === 'err' ? '!' : '✓'),
+      iconWrap: { flex: '0 0 26px', width: '26px', height: '26px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, background: toastColor[t.kind] + '22', color: toastColor[t.kind] },
+      style: { display: 'flex', alignItems: 'flex-start', gap: '11px', minWidth: '290px', maxWidth: '340px', padding: '13px 14px', borderRadius: '12px', background: '#1a1d22', border: '1px solid #2a2f37', boxShadow: '0 12px 34px rgba(0,0,0,.45)', animation: 'cp-toastIn .22s cubic-bezier(.2,.8,.2,1)' },
+      onClose: () => this.setState(s => ({ toasts: s.toasts.filter(x => x.id !== t.id) })),
+    }));
+
+    const titles = {
+      pausa: ['Em pausa', 'Funcionários atualmente em pausa'],
+      trab: ['Trabalhando', 'Funcionários atualmente trabalhando'],
+      import: ['Importação via Excel', 'Cadastre vários funcionários de uma vez'],
+      historico: ['Histórico de pausas', 'Todas as pausas realizadas'],
+    };
+    const title = titles[scr] || titles.pausa;
+    const collapsed = st.menuCollapsed;
+    const navStyle = (key) => {
+      const active = scr === key;
+      return { display: 'flex', alignItems: 'center', gap: collapsed ? '0' : '11px', width: '100%', padding: collapsed ? '10px 0' : '10px 12px', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '13.5px', fontWeight: active ? 600 : 500, transition: 'all .12s',
+        background: active ? 'rgba(79,142,247,.13)' : 'transparent', color: active ? '#8cbcff' : '#9aa1ab' };
+    };
+
+    const fdis = !st.form.nome.trim() || st.form.cpf.replace(/\D/g,'').length < 11;
+
+    return {
+      // nav / chrome
+      goPausaView: () => this.setState({ screen: 'pausa', search: '' }),
+      goTrabView: () => this.setState({ screen: 'trab', search: '' }),
+      goImport: () => this.setState({ screen: 'import' }),
+      goHistorico: () => this.setState({ screen: 'historico' }),
+      navPausaStyle: navStyle('pausa'), navTrabStyle: navStyle('trab'), navImpStyle: navStyle('import'), navHistStyle: navStyle('historico'),
+      pauseBadgeStyle: { minWidth: '20px', height: '20px', padding: '0 6px', borderRadius: '10px', background: onPause ? 'rgba(234,179,8,.2)' : '#1c1f25', color: onPause ? '#f5c542' : '#6b727c', fontSize: '11.5px', fontWeight: 700, display: collapsed ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center' },
+      workBadgeStyle: { minWidth: '20px', height: '20px', padding: '0 6px', borderRadius: '10px', background: working ? 'rgba(47,191,113,.18)' : '#1c1f25', color: working ? '#4ad991' : '#6b727c', fontSize: '11.5px', fontWeight: 700, display: collapsed ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center' },
+
+      // menu retrátil (expandido <-> só ícones)
+      toggleMenu: () => this.setState(s => ({ menuCollapsed: !s.menuCollapsed })),
+      toggleTitle: collapsed ? 'Expandir menu' : 'Recolher menu',
+      sidebarStyle: { width: collapsed ? '68px' : '248px', minWidth: collapsed ? '68px' : '248px', maxWidth: collapsed ? '68px' : '248px', flex: collapsed ? '0 0 68px' : '0 0 248px', background: '#0f1013', borderRight: '1px solid #1c1f25', display: 'flex', flexDirection: 'column', padding: collapsed ? '18px 10px' : '18px 14px', overflow: 'hidden', transition: 'width .18s ease, min-width .18s ease, max-width .18s ease, padding .18s ease' },
+      brandRowStyle: collapsed
+        ? { display: 'flex', justifyContent: 'center', padding: '6px 0 20px' }
+        : { display: 'flex', alignItems: 'center', gap: '11px', padding: '6px 8px 22px 8px' },
+      brandTextStyle: { display: collapsed ? 'none' : 'block', minWidth: 0, overflow: 'hidden' },
+      sectionLabelStyle: { fontSize: '10.5px', fontWeight: 700, letterSpacing: '.8px', color: '#565d67', padding: '4px 10px 8px', visibility: collapsed ? 'hidden' : 'visible' },
+      navTextStyle: { flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: collapsed ? 'none' : 'block' },
+      // Alça flutuante na borda direita da sidebar, ABAIXO do header (fora da
+      // região arrastável). Sem transform: left já centra o quadrado na borda.
+      toggleBtnStyle: { position: 'absolute', left: collapsed ? '54px' : '234px', top: '78px', zIndex: 40, width: '28px', height: '28px', borderRadius: '7px', border: '1px solid #262a30', background: '#16181d', color: '#9aa1ab', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, margin: 0, lineHeight: 0, boxShadow: '0 2px 8px rgba(0,0,0,.35)', transition: 'left .18s ease, background .12s, color .12s, border-color .12s' },
+      toggleIconStyle: { transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform .18s ease' },
+      newBtnStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: collapsed ? '0' : '8px', padding: '11px', borderRadius: '10px', border: 'none', background: '#4f8ef7', color: '#fff', fontSize: '13.5px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 14px rgba(79,142,247,.3)' },
+      offlineRowStyle: { display: 'flex', alignItems: 'center', gap: collapsed ? '0' : '9px', justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? '10px 0' : '10px 12px', borderRadius: '10px', background: '#121419', border: '1px solid #1c1f25' },
+      offlineTextStyle: { fontSize: '11.5px', lineHeight: 1.35, display: collapsed ? 'none' : 'block', overflow: 'hidden' },
+      screenTitle: title[0], screenSubtitle: title[1],
+      todayStr: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
+      isList: scr === 'pausa' || scr === 'trab', isImport: scr === 'import', isHistorico: scr === 'historico',
+
+      // kpis
+      kpis: { working, onPause, total: emps.length, avgPause: avg ? this.fmt(avg) : '--:--' },
+
+      // lista por status
+      search: st.search,
+      setSearch: (e) => this.setState({ search: e.target.value }),
+      listLabel: scr === 'trab' ? 'TRABALHANDO' : 'EM PAUSA',
+      emptyTitle: st.search.trim() ? 'Nenhum funcionário encontrado' : (scr === 'trab' ? 'Nenhum funcionário trabalhando' : 'Nenhum funcionário em pausa'),
+      emptySubtitle: st.search.trim() ? 'Ajuste a busca ou confira o outro status.' : (scr === 'trab' ? 'Nenhum colaborador está trabalhando no momento.' : 'Nenhum colaborador está em pausa no momento.'),
+      toggleSort: () => this.setState(s => ({ sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' })),
+      sortArrow: st.sortDir === 'asc' ? '↑' : '↓',
+      loading: st.loading,
+      skeleton: [1,2,3,4,5,6,7,8],
+      rows,
+      showRows: !st.loading && rows.length > 0,
+      showEmpty: !st.loading && rows.length === 0,
+      visibleCount: rows.length,
+
+      // import
+      importIdle: st.importStage === 'idle',
+      importPreview: st.importStage === 'preview',
+      importRunning: st.importStage === 'running',
+      importDone: st.importStage === 'report',
+      dropStyle: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '54px 24px', borderRadius: '18px', border: '2px dashed ' + (st.dragOver ? '#4f8ef7' : '#2a2f37'), background: st.dragOver ? 'rgba(79,142,247,.06)' : '#101216', cursor: 'pointer', transition: 'all .15s' },
+      onDragOver: (e) => { e.preventDefault(); if (!st.dragOver) this.setState({ dragOver: true }); },
+      onDropFile: (e) => { e.preventDefault(); this.setState({ dragOver: false }); this.simulateFile(); },
+      onSelectFile: () => this.simulateFile(),
+      onResetImport: () => this.setState({ importStage: 'idle', importFile: null, importProgress: 0 }),
+      onStartImport: () => this.runImport(),
+      onFinishImport: () => this.setState({ screen: 'pausa', importStage: 'idle', importFile: null }),
+      importFileName: f.name, importFileSize: f.size, importFileRows: f.rows,
+      prev: { valid: f.valid, duplicate: f.duplicate, invalid: f.invalid },
+      importProgress: st.importProgress,
+      progressBarStyle: { width: st.importProgress + '%', height: '100%', background: 'linear-gradient(90deg,#4f8ef7,#6aa8ff)', borderRadius: '8px', transition: 'width .18s ease' },
+      importIssues,
+
+      // history
+      histSearch: st.histSearch,
+      setHistSearch: (e) => this.setState({ histSearch: e.target.value }),
+      histHoje: () => this.setState({ histPeriod: 'hoje' }), hist7: () => this.setState({ histPeriod: '7' }), hist30: () => this.setState({ histPeriod: '30' }),
+      histChipHoje: this.chip(st.histPeriod === 'hoje'), histChip7: this.chip(st.histPeriod === '7'), histChip30: this.chip(st.histPeriod === '30'),
+      historyRows, histEmpty: historyRows.length === 0,
+
+      // cadastro
+      cadastroOpen: st.cadastroOpen,
+      openCadastro: () => this.setState({ cadastroOpen: true }),
+      closeCadastro: () => this.setState({ cadastroOpen: false }),
+      stop: (e) => e.stopPropagation(),
+      form: st.form,
+      setNome: (e) => this.setState(s => ({ form: { ...s.form, nome: e.target.value } })),
+      setCpf: (e) => this.setState(s => ({ form: { ...s.form, cpf: this.maskCpf(e.target.value) } })),
+      setJornada: (e) => this.setState(s => ({ form: { ...s.form, jornada: e.target.value } })),
+      saveCadastro: () => this.saveCadastro(),
+      saveDisabled: fdis,
+      saveBtnStyle: fdis
+        ? { padding: '10px 20px', borderRadius: '10px', border: 'none', background: '#1c2a44', color: '#5b7099', fontSize: '13.5px', fontWeight: 600, cursor: 'not-allowed' }
+        : { padding: '10px 20px', borderRadius: '10px', border: 'none', background: '#4f8ef7', color: '#fff', fontSize: '13.5px', fontWeight: 600, cursor: 'pointer' },
+
+      // confirmação de pausa (dialog)
+      confirmOpen: !!st.confirm,
+      confirmTitle: st.confirm ? (st.confirm.action === 'start' ? 'Iniciar pausa' : 'Finalizar pausa') : '',
+      confirmMsg: st.confirm
+        ? (st.confirm.action === 'start'
+            ? 'Deseja iniciar a pausa de ' + st.confirm.name + '?'
+            : 'Deseja finalizar a pausa de ' + st.confirm.name + '? O funcionário voltará a trabalhar.')
+        : '',
+      confirmBtnLabel: st.confirm ? (st.confirm.action === 'start' ? 'Iniciar pausa' : 'Finalizar pausa') : '',
+      confirmBtnStyle: (st.confirm && st.confirm.action === 'finish')
+        ? { padding: '10px 18px', borderRadius: '10px', border: 'none', background: '#f5c542', color: '#1a1400', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer' }
+        : { padding: '10px 18px', borderRadius: '10px', border: 'none', background: '#4f8ef7', color: '#fff', fontSize: '13.5px', fontWeight: 600, cursor: 'pointer' },
+      confirmIconStyle: {
+        width: '40px', height: '40px', borderRadius: '11px', flex: '0 0 40px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: (st.confirm && st.confirm.action === 'finish') ? 'rgba(234,179,8,.14)' : 'rgba(79,142,247,.14)',
+        color: (st.confirm && st.confirm.action === 'finish') ? '#f5c542' : '#6aa8ff',
+      },
+      closeConfirm: () => this.setState({ confirm: null }),
+      doConfirm: () => this.runConfirm(),
+
+      // controles da janela (barra de título customizada)
+      winMinimize: () => { try { window.electronAPI && window.electronAPI.minimize(); } catch (e) {} },
+      winMaximize: () => { try { window.electronAPI && window.electronAPI.maximize(); } catch (e) {} },
+      winClose: () => { try { window.electronAPI && window.electronAPI.close(); } catch (e) {} },
+
+      // toasts
+      toasts,
+    };
+  }
+
+  maskCpf(v) {
+    v = v.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 9) return v.slice(0,3)+'.'+v.slice(3,6)+'.'+v.slice(6,9)+'-'+v.slice(9);
+    if (v.length > 6) return v.slice(0,3)+'.'+v.slice(3,6)+'.'+v.slice(6);
+    if (v.length > 3) return v.slice(0,3)+'.'+v.slice(3);
+    return v;
+  }
+  tagStyle(c) { return { display: 'inline-flex', padding: '3px 9px', borderRadius: '6px', fontSize: '11.5px', fontWeight: 600, background: c + '1f', color: c, border: '1px solid ' + c + '3a' }; }
+}
+</script>
+</body>
+</html>

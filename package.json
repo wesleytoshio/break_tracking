@@ -1,0 +1,37 @@
+{
+  "name": "controle-de-pausas-desktop",
+  "version": "1.0.0",
+  "description": "Controle de Pausas — aplicativo desktop (Electron) com notificações nativas do Windows",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11"
+  },
+  "build": {
+    "appId": "com.controledepausas.desktop",
+    "productName": "Controle de Pausas",
+    "files": [
+      "main.js",
+      "preload.js",
+      "Controle de Pausas.dc.html",
+      "support.js",
+      "vendor/**",
+      "assets/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

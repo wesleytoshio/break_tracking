@@ -71,6 +71,11 @@
         <span style="{{ navTextStyle }}">Trabalhando</span>
         <span style="{{ workBadgeStyle }}">{{ kpis.working }}</span>
       </button>
+      <button onClick="{{ goForaView }}" title="Fora do expediente" style="{{ navForaStyle }}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 17px;"><path d="M10 21h4"/><path d="M3 10a9 9 0 0 1 18 0v3a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"/><path d="M8 16v-2M16 16v-2"/></svg>
+        <span style="{{ navTextStyle }}">Fora</span>
+        <span style="{{ offBadgeStyle }}">{{ kpis.off }}</span>
+      </button>
       <button onClick="{{ goImport }}" title="Importação Excel" style="{{ navImpStyle }}">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 17px;"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
         <span style="{{ navTextStyle }}">Importação Excel</span>
@@ -79,16 +84,20 @@
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 17px;"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 8v4l3 2"/></svg>
         <span style="{{ navTextStyle }}">Histórico</span>
       </button>
+      <button onClick="{{ goCreditos }}" title="Créditos" style="{{ navCredStyle }}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 17px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+        <span style="{{ navTextStyle }}">Créditos</span>
+      </button>
     </nav>
 
     <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
       <button onClick="{{ openCadastro }}" title="Novo funcionário" style="{{ newBtnStyle }}" style-hover="background: #5c98f8;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="flex: 0 0 16px;"><path d="M12 5v14M5 12h14"/></svg>
-        <span style="{{ navTextStyle }}">Novo funcionário</span>
+        <span style="{{ navTextStyle }}">Novo operador</span>
       </button>
-      <div style="{{ offlineRowStyle }}">
-        <span style="width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: #2fbf71; box-shadow: 0 0 0 3px rgba(47,191,113,.18);"></span>
-        <div style="{{ offlineTextStyle }}"><div style="font-weight: 600; color: #d6d9de; white-space: nowrap;">Modo offline</div><div style="color: #6b727c; white-space: nowrap;">Dados salvos localmente</div></div>
+      <div style="{{ offlineRowStyle }}" title="Versão Beta 1.0.0">
+        <span style="display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; padding: 2px 7px; border-radius: 6px; font-size: 9.5px; font-weight: 800; letter-spacing: .5px; background: rgba(245,197,66,.16); color: #f5c542; border: 1px solid rgba(245,197,66,.35);">BETA</span>
+        <div style="{{ offlineTextStyle }}"><div style="font-weight: 600; color: #d6d9de; white-space: nowrap; font-family: 'JetBrains Mono', monospace;">v1.0.0</div><div style="color: #6b727c; white-space: nowrap;">Break Tracking</div></div>
       </div>
     </div>
   </aside>
@@ -106,12 +115,15 @@
         <div style="font-size: 19px; font-weight: 700; letter-spacing: -.3px;">{{ screenTitle }}</div>
         <div style="font-size: 12.5px; color: #6b727c; margin-top: 1px;">{{ screenSubtitle }}</div>
       </div>
+      <button onClick="{{ openSaturdayModal }}" class="cp-nodrag" style="{{ saturdayChipStyle }}" title="Rodízio de sábado — clique para ver/editar" style-hover="filter: brightness(1.15);">
+        <span style="{{ saturdayDot }}"></span>{{ saturdayText }}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7; margin-left:2px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </button>
       <div style="display: flex; align-items: center; gap: 8px; padding: 7px 13px; border-radius: 9px; background: #121419; border: 1px solid #1c1f25; font-size: 12.5px; color: #9aa1ab;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         {{ todayStr }}
       </div>
       <div style="display: flex; align-items: center; gap: 9px; padding-left: 6px;">
-        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(140deg,#a78bfa,#7c5cf0); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff;">SC</div>
         <div style="display: flex; gap: 3px; padding-left: 4px;">
           <button onClick="{{ winMinimize }}" title="Minimizar" class="cp-winbtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg></button>
           <button onClick="{{ winMaximize }}" title="Maximizar" class="cp-winbtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg></button>
@@ -153,11 +165,11 @@
           </div>
           <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 14px; padding: 17px 18px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-              <span style="font-size: 12.5px; color: #9aa1ab; font-weight: 500;">Tempo médio de pausa</span>
-              <span style="width: 30px; height: 30px; border-radius: 8px; background: rgba(167,139,250,.14); display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+              <span style="font-size: 12.5px; color: #9aa1ab; font-weight: 500;">Fora do expediente</span>
+              <span style="width: 30px; height: 30px; border-radius: 8px; background: rgba(138,145,155,.14); display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9aa1ab" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 21h4"/><path d="M3 10a9 9 0 0 1 18 0v3a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"/></svg></span>
             </div>
-            <div style="font-size: 30px; font-weight: 700; letter-spacing: -1px; font-family: 'JetBrains Mono', monospace;">{{ kpis.avgPause }}</div>
-            <div style="font-size: 11.5px; color: #6b727c; margin-top: 2px;">restante nas pausas ativas</div>
+            <div style="font-size: 30px; font-weight: 700; letter-spacing: -1px; font-variant-numeric: tabular-nums; color: #9aa1ab;">{{ kpis.off }}</div>
+            <div style="font-size: 11.5px; color: #6b727c; margin-top: 2px;">fora da jornada agora</div>
           </div>
         </div>
 
@@ -166,10 +178,15 @@
           <div style="display: flex; align-items: center; gap: 12px; padding: 15px 18px; border-bottom: 1px solid #1c1f25; flex-wrap: wrap;">
             <div style="position: relative; flex: 1; min-width: 220px; max-width: 340px;">
               <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b727c" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-              <input value="{{ search }}" onInput="{{ setSearch }}" placeholder="Buscar por nome ou CPF..." style="width: 100%; padding: 9px 12px 9px 34px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13px; outline: none;" style-focus="border-color: #4f8ef7; box-shadow: 0 0 0 3px rgba(79,142,247,.14);">
+              <input value="{{ search }}" onInput="{{ setSearch }}" placeholder="Buscar por nome..." style="width: 100%; padding: 9px 12px 9px 34px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13px; outline: none;" style-focus="border-color: #4f8ef7; box-shadow: 0 0 0 3px rgba(79,142,247,.14);">
             </div>
             <div style="flex: 1;"></div>
-            <button onClick="{{ goImport }}" style="display: flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13px; font-weight: 500; cursor: pointer;" style-hover="border-color: #3a414b; background: #16181d;">
+            <button onClick="{{ exportExcel }}" title="Disponível em uma versão futura" style="display: flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 9px; border: 1px solid #1c1f25; background: #0c0d10; color: #4a505a; font-size: 13px; font-weight: 500; cursor: pointer;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
+              Exportar
+              <span style="margin-left: 2px; padding: 1px 6px; border-radius: 5px; font-size: 9px; font-weight: 800; letter-spacing: .4px; background: rgba(245,197,66,.14); color: #b0912f; border: 1px solid rgba(245,197,66,.22);">BETA</span>
+            </button>
+            <button onClick="{{ importExcel }}" style="display: flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13px; font-weight: 500; cursor: pointer;" style-hover="border-color: #3a414b; background: #16181d;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
               Importar
             </button>
@@ -206,13 +223,13 @@
                   <div style="{{ row.avatarLg }}">{{ row.initials }}</div>
                   <div style="flex: 1; min-width: 0;">
                     <div style="font-size: 14.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.name }}</div>
-                    <div style="font-size: 12px; color: #6b727c;">{{ row.role }}</div>
+                    <span style="{{ row.turnoChipStyle }}">{{ row.turnoLabel }}</span>
                   </div>
                   <span style="{{ row.statusStyle }}"><span style="{{ row.dotStyle }}"></span>{{ row.statusLabel }}</span>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #1c1f25; border: 1px solid #1c1f25; border-radius: 10px; overflow: hidden; margin-bottom: 13px;">
-                  <div style="background: #101216; padding: 9px 12px;"><div style="font-size: 10px; font-weight: 700; letter-spacing: .5px; color: #565d67; margin-bottom: 3px;">CPF</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #c5c9cf;">{{ row.cpf }}</div></div>
-                  <div style="background: #101216; padding: 9px 12px;"><div style="font-size: 10px; font-weight: 700; letter-spacing: .5px; color: #565d67; margin-bottom: 3px;">JORNADA</div><div style="font-size: 12.5px; color: #c5c9cf;">{{ row.jornada }}</div></div>
+                  <div style="background: #101216; padding: 9px 12px;"><div style="font-size: 10px; font-weight: 700; letter-spacing: .5px; color: #565d67; margin-bottom: 3px;">JORNADA</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #c5c9cf;">{{ row.jornadaText }}</div></div>
+                  <div style="background: #101216; padding: 9px 12px;"><div style="font-size: 10px; font-weight: 700; letter-spacing: .5px; color: #565d67; margin-bottom: 3px;">PAUSAS</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #c5c9cf;">{{ row.pausasText }}</div></div>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
                   <div>
@@ -256,81 +273,36 @@
       <sc-if value="{{ isImport }}" hint-placeholder-val="{{ false }}">
       <section data-screen-label="Importação Excel" style="max-width: 780px; margin: 0 auto;">
 
-        <sc-if value="{{ importIdle }}" hint-placeholder-val="{{ true }}">
-          <div onDragOver="{{ onDragOver }}" onDrop="{{ onDropFile }}" onClick="{{ onSelectFile }}" style="{{ dropStyle }}">
-            <div style="width: 64px; height: 64px; border-radius: 18px; background: rgba(79,142,247,.12); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></div>
-            <div style="font-size: 16.5px; font-weight: 600; margin-bottom: 6px;">Arraste sua planilha aqui</div>
-            <div style="font-size: 13px; color: #6b727c; margin-bottom: 20px;">Formatos aceitos: .xlsx, .xls, .csv · até 5&nbsp;MB</div>
-            <button style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; border: none; background: #4f8ef7; color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer;">Selecionar arquivo</button>
-            <div style="margin-top: 22px; font-size: 12px; color: #565d67;">Colunas esperadas: <span style="font-family:'JetBrains Mono',monospace; color:#8a919b;">Nome · CPF · Jornada</span></div>
-          </div>
-          <div style="display: flex; gap: 12px; margin-top: 16px; padding: 14px 16px; background: #121419; border: 1px solid #1c1f25; border-radius: 12px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" stroke-width="2" stroke-linecap="round" style="flex-shrink:0; margin-top:1px;"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
-            <div style="font-size: 12.5px; color: #9aa1ab; line-height: 1.5;">Baixe o <a href="#">modelo de planilha</a> para garantir que as colunas estejam no formato correto. O CPF deve conter 11 dígitos.</div>
-          </div>
-        </sc-if>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 44px 24px; border-radius: 18px; border: 2px dashed #2a2f37; background: #101216; cursor: pointer;" onClick="{{ importExcel }}" style-hover="border-color:#4f8ef7; background:rgba(79,142,247,.05);">
+          <div style="width: 64px; height: 64px; border-radius: 18px; background: rgba(79,142,247,.12); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></div>
+          <div style="font-size: 16.5px; font-weight: 600; margin-bottom: 6px;">Importar escala de pausas</div>
+          <div style="font-size: 13px; color: #6b727c; margin-bottom: 20px;">Selecione uma planilha <span style="font-family:'JetBrains Mono',monospace; color:#8a919b;">.xlsx</span> no formato abaixo</div>
+          <button onClick="{{ importExcel }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; border: none; background: #4f8ef7; color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer;">Selecionar planilha</button>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 16px; padding: 14px 16px; background: #121419; border: 1px solid #1c1f25; border-radius: 12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" stroke-width="2" stroke-linecap="round" style="flex-shrink:0; margin-top:1px;"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+          <div style="font-size: 12.5px; color: #9aa1ab; line-height: 1.7;">Colunas (linha 1 = cabeçalho, 1 operador por linha):<br><span style="font-family:'JetBrains Mono',monospace; color:#c5c9cf;">OPERADOR · TURNO · ENTRADA · SAIDA · SABADO ENTRADA · SABADO SAIDA · PAUSA 10 · PAUSA 30 · PAUSA 60 · PAUSA 10 (2a)</span><br><b style="color:#c5c9cf;">TURNO</b>: integral / manha / tarde · horários em <b style="color:#c5c9cf;">HH:MM</b> · pausas são o <b style="color:#c5c9cf;">início</b> (o retorno é calculado) · use <span style="font-family:'JetBrains Mono',monospace;">-</span> quando não houver.</div>
+        </div>
 
-        <sc-if value="{{ importPreview }}" hint-placeholder-val="{{ false }}">
-          <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 16px; padding: 22px;">
-            <div style="display: flex; align-items: center; gap: 14px; padding-bottom: 20px; border-bottom: 1px solid #1c1f25; margin-bottom: 20px;">
-              <div style="width: 46px; height: 46px; border-radius: 11px; background: rgba(47,191,113,.14); display: flex; align-items: center; justify-content: center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2fbf71" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 13 2 2 4-4"/></svg></div>
-              <div style="flex: 1;"><div style="font-size: 14.5px; font-weight: 600;">{{ importFileName }}</div><div style="font-size: 12px; color: #6b727c;">{{ importFileSize }} · {{ importFileRows }} linhas detectadas</div></div>
-              <button onClick="{{ onResetImport }}" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #23272e; background: #0e0f12; color: #9aa1ab; font-size: 12.5px; cursor: pointer;" style-hover="border-color:#3a414b;">Trocar</button>
+        <div style="margin-top: 16px; background: #121419; border: 1px solid #1c1f25; border-radius: 14px; overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #1c1f25;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: .07em; color: #9aa1ab;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6aa8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+              EXEMPLO DO ARQUIVO
             </div>
-            <div style="font-size: 12.5px; font-weight: 600; color: #9aa1ab; margin-bottom: 12px;">Validação prévia</div>
-            <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 22px;">
-              <div style="background:#0e0f12; border:1px solid #1c1f25; border-radius:11px; padding:13px;"><div style="font-size:22px;font-weight:700;color:#2fbf71;font-variant-numeric:tabular-nums;">{{ prev.valid }}</div><div style="font-size:11.5px;color:#6b727c;">Válidos</div></div>
-              <div style="background:#0e0f12; border:1px solid #1c1f25; border-radius:11px; padding:13px;"><div style="font-size:22px;font-weight:700;color:#f5c542;font-variant-numeric:tabular-nums;">{{ prev.duplicate }}</div><div style="font-size:11.5px;color:#6b727c;">Duplicados</div></div>
-              <div style="background:#0e0f12; border:1px solid #1c1f25; border-radius:11px; padding:13px;"><div style="font-size:22px;font-weight:700;color:#ef4444;font-variant-numeric:tabular-nums;">{{ prev.invalid }}</div><div style="font-size:11.5px;color:#6b727c;">Inválidos</div></div>
-              <div style="background:#0e0f12; border:1px solid #1c1f25; border-radius:11px; padding:13px;"><div style="font-size:22px;font-weight:700;color:#e6e8eb;font-variant-numeric:tabular-nums;">{{ importFileRows }}</div><div style="font-size:11.5px;color:#6b727c;">Total</div></div>
-            </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-              <button onClick="{{ onResetImport }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13.5px; font-weight: 500; cursor: pointer;" style-hover="border-color:#3a414b;">Cancelar</button>
-              <button onClick="{{ onStartImport }}" style="padding: 10px 20px; border-radius: 10px; border: none; background: #4f8ef7; color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer;" style-hover="background:#5c98f8;">Importar {{ prev.valid }} registros</button>
-            </div>
+            <button onClick="{{ downloadTemplate }}" title="Baixar modelo (.xlsx)" style="width: 30px; height: 30px; border-radius: 8px; border: 1px solid #23272e; background: #0e0f12; color: #9aa1ab; cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="border-color:#4f8ef7; color:#6aa8ff;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></button>
           </div>
-        </sc-if>
+          <div style="padding: 14px 16px; overflow-x: auto;">
+            <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #c5c9cf; line-height: 1.8; white-space: pre;">{{ templatePreview }}</pre>
+          </div>
+        </div>
 
-        <sc-if value="{{ importRunning }}" hint-placeholder-val="{{ false }}">
-          <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 16px; padding: 40px 28px; text-align: center;">
-            <div style="width: 52px; height: 52px; border-radius: 50%; border: 3px solid #23272e; border-top-color: #4f8ef7; margin: 0 auto 20px; animation: cp-spin .8s linear infinite;"></div>
-            <div style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Importando registros...</div>
-            <div style="font-size: 13px; color: #6b727c; margin-bottom: 22px;">Validando e salvando localmente</div>
-            <div style="max-width: 420px; margin: 0 auto;">
-              <div style="height: 9px; border-radius: 8px; background: #0e0f12; border: 1px solid #1c1f25; overflow: hidden;"><div style="{{ progressBarStyle }}"></div></div>
-              <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #9aa1ab; font-family: 'JetBrains Mono', monospace;"><span>{{ importProgress }}%</span><span>{{ importFileRows }} linhas</span></div>
-            </div>
-          </div>
-        </sc-if>
+        <div style="display: flex; align-items: center; gap: 14px; margin-top: 16px; padding: 18px 20px; background: #121419; border: 1px solid #1c1f25; border-radius: 14px;">
+          <div style="width: 42px; height: 42px; flex: 0 0 42px; border-radius: 11px; background: rgba(47,191,113,.12); display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2fbf71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></div>
+          <div style="flex: 1; min-width: 0;"><div style="font-size: 14.5px; font-weight: 600;">Exportar escala atual</div><div style="font-size: 12.5px; color: #6b727c;">Salva os operadores atuais em .xlsx no mesmo formato</div></div>
+          <button onClick="{{ exportExcel }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #2a5a3a; background: rgba(47,191,113,.14); color: #4ad991; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap;" style-hover="background:rgba(47,191,113,.22);">Exportar</button>
+        </div>
 
-        <sc-if value="{{ importDone }}" hint-placeholder-val="{{ false }}">
-          <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 16px; padding: 26px;">
-            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 24px;">
-              <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(47,191,113,.14); display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2fbf71" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-              <div><div style="font-size: 16.5px; font-weight: 700;">Importação concluída</div><div style="font-size: 13px; color: #6b727c;">Relatório do processamento de {{ importFileName }}</div></div>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 22px;">
-              <div style="background:#0e0f12; border:1px solid #1c3320; border-radius:12px; padding:15px;"><div style="font-size:26px;font-weight:700;color:#2fbf71;font-variant-numeric:tabular-nums;">{{ prev.valid }}</div><div style="font-size:12px;color:#8a919b;margin-top:2px;">Importados</div></div>
-              <div style="background:#0e0f12; border:1px solid #3a3110; border-radius:12px; padding:15px;"><div style="font-size:26px;font-weight:700;color:#f5c542;font-variant-numeric:tabular-nums;">{{ prev.duplicate }}</div><div style="font-size:12px;color:#8a919b;margin-top:2px;">Duplicados (ignorados)</div></div>
-              <div style="background:#0e0f12; border:1px solid #3a1a1a; border-radius:12px; padding:15px;"><div style="font-size:26px;font-weight:700;color:#ef4444;font-variant-numeric:tabular-nums;">{{ prev.invalid }}</div><div style="font-size:12px;color:#8a919b;margin-top:2px;">Inválidos</div></div>
-              <div style="background:#0e0f12; border:1px solid #1c1f25; border-radius:12px; padding:15px;"><div style="font-size:26px;font-weight:700;color:#e6e8eb;font-variant-numeric:tabular-nums;">{{ importFileRows }}</div><div style="font-size:12px;color:#8a919b;margin-top:2px;">Total processado</div></div>
-            </div>
-            <div style="font-size: 12.5px; font-weight: 600; color: #9aa1ab; margin-bottom: 10px;">Ocorrências encontradas</div>
-            <div style="border: 1px solid #1c1f25; border-radius: 12px; overflow: hidden; margin-bottom: 22px;">
-              <sc-for list="{{ importIssues }}" as="iss" hint-placeholder-count="4">
-                <div style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-bottom: 1px solid #16181d;">
-                  <span style="{{ iss.tagStyle }}">{{ iss.tag }}</span>
-                  <span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#6b727c;">Linha {{ iss.line }}</span>
-                  <span style="font-size:12.5px; color:#c5c9cf; flex:1;">{{ iss.msg }}</span>
-                </div>
-              </sc-for>
-            </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-              <button onClick="{{ onResetImport }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13.5px; font-weight: 500; cursor: pointer;" style-hover="border-color:#3a414b;">Nova importação</button>
-              <button onClick="{{ onFinishImport }}" style="padding: 10px 20px; border-radius: 10px; border: none; background: #4f8ef7; color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer;" style-hover="background:#5c98f8;">Ver funcionários</button>
-            </div>
-          </div>
-        </sc-if>
       </section>
       </sc-if>
 
@@ -379,6 +351,51 @@
       </section>
       </sc-if>
 
+      <!-- ============ CRÉDITOS ============ -->
+      <sc-if value="{{ isCreditos }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Créditos" style="max-width: 640px; margin: 0 auto;">
+        <div style="background: #121419; border: 1px solid #1c1f25; border-radius: 18px; overflow: hidden;">
+          <div style="padding: 34px 28px; text-align: center; background: linear-gradient(160deg, rgba(79,142,247,.10), rgba(167,139,250,.06));">
+            <div style="width: 60px; height: 60px; border-radius: 15px; margin: 0 auto 16px; background: linear-gradient(140deg, #4f8ef7, #2f6fe0); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(79,142,247,.35);">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2"/><path d="M9 2h6"/></svg>
+            </div>
+            <div style="font-size: 20px; font-weight: 800; letter-spacing: -.3px;">Controle de Pausas</div>
+            <div style="font-size: 13px; color: #6b727c; margin-top: 4px;">Gestão operacional de pausas · v1.0.0</div>
+          </div>
+          <div style="padding: 24px 28px;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: .8px; color: #565d67; margin-bottom: 14px;">EQUIPE</div>
+
+            <div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: #0e0f12; border: 1px solid #1c1f25; margin-bottom: 12px;">
+              <div style="width: 46px; height: 46px; flex: 0 0 46px; border-radius: 50%; background: rgba(244,114,182,.14); color: #f472b6; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; border: 1px solid rgba(244,114,182,.3);">IS</div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 15px; font-weight: 700;">Isadora</div>
+                <div style="font-size: 12.5px; color: #6b727c;">Desenvolvedora</div>
+                <a href="mailto:isa@gmail.com" onClick="{{ mailIsa }}" style="font-size: 12.5px; color: #6aa8ff; font-family: 'JetBrains Mono', monospace;">isa@gmail.com</a>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: #0e0f12; border: 1px solid #1c1f25;">
+              <div style="width: 46px; height: 46px; flex: 0 0 46px; border-radius: 50%; background: rgba(79,142,247,.14); color: #6aa8ff; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; border: 1px solid rgba(79,142,247,.3);">WD</div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 15px; font-weight: 700;">Wesley Dev</div>
+                <div style="font-size: 12.5px; color: #6b727c;">Colaborador / Desenvolvedor</div>
+                <a href="mailto:wesley@wesleydev.com" onClick="{{ mailWesley }}" style="font-size: 12.5px; color: #6aa8ff; font-family: 'JetBrains Mono', monospace;">wesley@wesleydev.com</a>
+              </div>
+            </div>
+
+            <div style="margin-top: 22px; padding: 16px; border-radius: 14px; background: rgba(79,142,247,.07); border: 1px solid rgba(79,142,247,.18); text-align: center;">
+              <div style="font-size: 13px; color: #9aa1ab; margin-bottom: 11px;">Dúvidas, sugestões ou suporte? Entre em contato:</div>
+              <button onClick="{{ mailIsa }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; border: none; background: #4f8ef7; color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(79,142,247,.3);" style-hover="background: #5c98f8;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                isa@gmail.com
+              </button>
+            </div>
+          </div>
+        </div>
+        <div style="text-align: center; font-size: 11.5px; color: #565d67; margin-top: 18px;">© 2026 Break Tracking · Todos os direitos reservados</div>
+      </section>
+      </sc-if>
+
     </div>
   </main>
 
@@ -387,7 +404,7 @@
     <div onClick="{{ closeCadastro }}" style="position: fixed; inset: 0; background: rgba(5,6,8,.68); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 100; animation: cp-fadeIn .16s ease;">
       <div onClick="{{ stop }}" style="width: 460px; max-width: calc(100vw - 40px); background: #16181d; border: 1px solid #262a30; border-radius: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.6); animation: cp-modalIn .22s cubic-bezier(.2,.8,.2,1); overflow: hidden;">
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; border-bottom: 1px solid #23272e;">
-          <div><div style="font-size: 16.5px; font-weight: 700;">Novo funcionário</div><div style="font-size: 12.5px; color: #6b727c; margin-top: 1px;">Cadastro manual</div></div>
+          <div><div style="font-size: 16.5px; font-weight: 700;">Novo operador</div><div style="font-size: 12.5px; color: #6b727c; margin-top: 1px;">Nome, turno e horários de pausa</div></div>
           <button onClick="{{ closeCadastro }}" style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #9aa1ab; cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="border-color:#3a414b; color:#e6e8eb;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         </div>
         <div style="padding: 22px;">
@@ -396,20 +413,66 @@
             <input value="{{ form.nome }}" onInput="{{ setNome }}" placeholder="Ex.: Maria Silva" style="width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13.5px; outline: none;" style-focus="border-color:#4f8ef7; box-shadow:0 0 0 3px rgba(79,142,247,.14);">
           </div>
           <div style="margin-bottom: 16px;">
-            <label style="display: block; font-size: 12.5px; font-weight: 600; color: #c5c9cf; margin-bottom: 7px;">CPF</label>
-            <input value="{{ form.cpf }}" onInput="{{ setCpf }}" placeholder="000.000.000-00" style="width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13.5px; outline: none; font-family: 'JetBrains Mono', monospace;" style-focus="border-color:#4f8ef7; box-shadow:0 0 0 3px rgba(79,142,247,.14);">
-          </div>
-          <div style="margin-bottom: 4px;">
-            <label style="display: block; font-size: 12.5px; font-weight: 600; color: #c5c9cf; margin-bottom: 7px;">Tipo de jornada</label>
-            <select value="{{ form.jornada }}" onChange="{{ setJornada }}" style="width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13.5px; outline: none; cursor: pointer;" style-focus="border-color:#4f8ef7;">
-              <option value="6h">6h — 1 pausa de 15 min</option>
-              <option value="8h">8h — 2 pausas de 15 min + almoço 1h</option>
+            <label style="display: block; font-size: 12.5px; font-weight: 600; color: #c5c9cf; margin-bottom: 7px;">Turno</label>
+            <select value="{{ form.turno }}" onChange="{{ setTurno }}" style="width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13.5px; outline: none; cursor: pointer;" style-focus="border-color:#4f8ef7;">
+              <option value="manha">Manhã (sábados intercalados)</option>
+              <option value="tarde">Tarde (sábados intercalados)</option>
+              <option value="integral">Integral (seg–sex, sem sábado)</option>
             </select>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 12.5px; font-weight: 600; color: #c5c9cf; margin-bottom: 7px;">Equipe / horário <span style="color:#6b727c; font-weight:500;">— preenche jornada e pausas</span></label>
+            <select value="{{ form.presetIndex }}" onChange="{{ setPreset }}" style="width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13.5px; outline: none; cursor: pointer;" style-focus="border-color:#4f8ef7;">
+              <sc-for list="{{ presetOptions }}" as="po" hint-placeholder-count="3">
+                <option value="{{ po.value }}">{{ po.label }}</option>
+              </sc-for>
+            </select>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 12.5px; font-weight: 600; color: #c5c9cf; margin-bottom: 7px;">Jornada <span style="color:#6b727c; font-weight:500;">— seg a sex</span></label>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="time" value="{{ form.jornadaInicio }}" onInput="{{ setJornadaInicio }}" style="flex: 1; padding: 10px 11px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13px; outline: none; font-family: 'JetBrains Mono', monospace;" style-focus="border-color:#4f8ef7;">
+              <span style="font-size: 12.5px; color: #6b727c;">até</span>
+              <input type="time" value="{{ form.jornadaFim }}" onInput="{{ setJornadaFim }}" style="flex: 1; padding: 10px 11px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13px; outline: none; font-family: 'JetBrains Mono', monospace;" style-focus="border-color:#4f8ef7;">
+            </div>
+          </div>
+          <sc-if value="{{ formHasSaturday }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-bottom: 16px;">
+              <label style="display: block; font-size: 12.5px; font-weight: 600; color: #c5c9cf; margin-bottom: 7px;">Jornada de sábado <span style="color:#6b727c; font-weight:500;">— nos sábados que a equipe trabalha</span></label>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="time" value="{{ form.sabInicio }}" onInput="{{ setSabInicio }}" style="flex: 1; padding: 10px 11px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13px; outline: none; font-family: 'JetBrains Mono', monospace;" style-focus="border-color:#4f8ef7;">
+                <span style="font-size: 12.5px; color: #6b727c;">até</span>
+                <input type="time" value="{{ form.sabFim }}" onInput="{{ setSabFim }}" style="flex: 1; padding: 10px 11px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13px; outline: none; font-family: 'JetBrains Mono', monospace;" style-focus="border-color:#4f8ef7;">
+              </div>
+            </div>
+          </sc-if>
+          <div style="margin-bottom: 4px;">
+            <label style="display: block; font-size: 12.5px; font-weight: 600; color: #c5c9cf; margin-bottom: 7px;">Pausas <span style="color:#6b727c; font-weight:500;">— informe o início; o retorno é calculado</span></label>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+              <select value="{{ form.newType }}" onChange="{{ setNewType }}" style="flex: 1; padding: 10px 11px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13px; outline: none; cursor: pointer;" style-focus="border-color:#4f8ef7;">
+                <option value="10">Pausa 10 (10 min)</option>
+                <option value="30">Pausa 30 (30 min)</option>
+                <option value="60">Pausa 60 (60 min)</option>
+              </select>
+              <input type="time" value="{{ form.newStart }}" onInput="{{ setNewStart }}" style="width: 118px; padding: 10px 11px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #e6e8eb; font-size: 13px; outline: none; font-family: 'JetBrains Mono', monospace;" style-focus="border-color:#4f8ef7;">
+              <button onClick="{{ addBreak }}" disabled="{{ addBreakDisabled }}" style="{{ addBreakStyle }}">+ Add</button>
+            </div>
+            <sc-if value="{{ hasFormBreaks }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-direction: column; gap: 7px;">
+                <sc-for list="{{ formBreaks }}" as="b" hint-placeholder-count="2">
+                  <div style="display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 10px; background: #101216; border: 1px solid #1c1f25;">
+                    <span style="{{ b.tagStyle }}">{{ b.label }}</span>
+                    <span style="flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #c5c9cf;">{{ b.start }} → {{ b.end }}</span>
+                    <button onClick="{{ b.onRemove }}" style="background: none; border: none; color: #6b727c; cursor: pointer; padding: 2px; display: flex;" style-hover="color:#ef4444;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
           </div>
         </div>
         <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 16px 22px; border-top: 1px solid #23272e; background: #121419;">
           <button onClick="{{ closeCadastro }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13.5px; font-weight: 500; cursor: pointer;" style-hover="border-color:#3a414b;">Cancelar</button>
-          <button onClick="{{ saveCadastro }}" disabled="{{ saveDisabled }}" style="{{ saveBtnStyle }}">Salvar funcionário</button>
+          <button onClick="{{ saveCadastro }}" disabled="{{ saveDisabled }}" style="{{ saveBtnStyle }}">Salvar operador</button>
         </div>
       </div>
     </div>
@@ -434,6 +497,51 @@
     </div>
   </sc-if>
 
+  <!-- ============ MODAL VERSÃO BETA ============ -->
+  <sc-if value="{{ betaOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeBeta }}" style="position: fixed; inset: 0; background: rgba(5,6,8,.68); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 130; animation: cp-fadeIn .16s ease;">
+      <div onClick="{{ stop }}" style="width: 420px; max-width: calc(100vw - 40px); background: #16181d; border: 1px solid #262a30; border-radius: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.6); animation: cp-modalIn .22s cubic-bezier(.2,.8,.2,1); overflow: hidden;">
+        <div style="padding: 26px 24px 20px; display: flex; gap: 14px; align-items: flex-start;">
+          <div style="width: 42px; height: 42px; flex: 0 0 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; background: rgba(245,197,66,.14); color: #f5c542;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg></div>
+          <div style="flex: 1;">
+            <div style="font-size: 16.5px; font-weight: 700; margin-bottom: 6px;">Versão beta</div>
+            <div style="font-size: 13.5px; color: #9aa1ab; line-height: 1.5;">A exportação da escala para Excel ainda não está disponível nesta versão beta. Este recurso chegará em uma versão futura do Break Tracking.</div>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; padding: 14px 22px; border-top: 1px solid #23272e; background: #121419;">
+          <button onClick="{{ closeBeta }}" style="padding: 10px 20px; border-radius: 10px; border: none; background: #4f8ef7; color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer;" style-hover="background:#5c98f8;">Entendi</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ MODAL RODÍZIO DE SÁBADO ============ -->
+  <sc-if value="{{ saturdayModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSaturdayModal }}" style="position: fixed; inset: 0; background: rgba(5,6,8,.68); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 130; animation: cp-fadeIn .16s ease;">
+      <div onClick="{{ stop }}" style="width: 440px; max-width: calc(100vw - 40px); background: #16181d; border: 1px solid #262a30; border-radius: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.6); animation: cp-modalIn .22s cubic-bezier(.2,.8,.2,1); overflow: hidden;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; border-bottom: 1px solid #23272e;">
+          <div><div style="font-size: 16.5px; font-weight: 700;">Rodízio de sábado</div><div style="font-size: 12.5px; color: #6b727c; margin-top: 1px;">Qual equipe trabalha em cada sábado</div></div>
+          <div style="display: flex; gap: 8px;">
+            <button onClick="{{ flipSaturday }}" title="Trocar o turno (inverte a ordem dos sábados)" style="display: flex; align-items: center; gap: 7px; padding: 0 12px; height: 32px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 12.5px; font-weight: 600; cursor: pointer;" style-hover="border-color:#4f8ef7; color:#6aa8ff;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Trocar turno</button>
+            <button onClick="{{ closeSaturdayModal }}" style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #9aa1ab; cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="border-color:#3a414b; color:#e6e8eb;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+          </div>
+        </div>
+        <div style="padding: 14px 22px 20px; max-height: 380px; overflow-y: auto;">
+          <sc-for list="{{ saturdaysList }}" as="s" hint-placeholder-count="6">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 4px; border-bottom: 1px solid #16181d;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #c5c9cf;">{{ s.dateStr }}</span>
+                <sc-if value="{{ s.isNow }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; font-weight: 700; letter-spacing: .4px; color: #6b727c;">PRÓXIMO</span></sc-if>
+              </div>
+              <span style="{{ s.chipStyle }}"><span style="{{ s.dotStyle }}"></span>{{ s.teamLabel }}</span>
+            </div>
+          </sc-for>
+          <div style="margin-top: 14px; font-size: 12px; color: #6b727c; line-height: 1.6;">A cada semana alterna: um sábado trabalha a equipe da Manhã (Tarde folga), no seguinte a Tarde (Manhã folga). O turno Integral não trabalha aos sábados.</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
   <!-- ============ TOASTS ============ -->
   <div style="position: fixed; bottom: 22px; right: 22px; display: flex; flex-direction: column; gap: 10px; z-index: 200;">
     <sc-for list="{{ toasts }}" as="t" hint-placeholder-count="0">
@@ -450,7 +558,7 @@
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;100%&quot;}}">
 class Component extends DCLogic {
   state = {
-    screen: 'pausa',
+    screen: 'trab',
     menuCollapsed: false,
     search: '',
     filter: 'todos',
@@ -459,8 +567,11 @@ class Component extends DCLogic {
     now: Date.now(),
     employees: this.buildEmployees(),
     cadastroOpen: false,
-    confirm: null, // { id, action: 'start' | 'finish', name }
-    form: { nome: '', cpf: '', jornada: '6h' },
+    confirm: null, // { id, action: 'start' | 'finish', name, label }
+    betaOpen: false, // modal "Versão beta" (ex.: ao clicar em Exportar)
+    satInfoOpen: false, // saturday rotation modal
+    saturdayPhase: 0, // rotation phase (0/1); flipping it re-orders all future saturdays
+    form: { nome: '', turno: 'manha', presetIndex: 0, jornadaInicio: '08:00', jornadaFim: '14:20', sabInicio: '08:00', sabFim: '14:20', breaks: [], newType: '10', newStart: '' },
     importStage: 'idle',
     importProgress: 0,
     importFile: null,
@@ -479,7 +590,7 @@ class Component extends DCLogic {
       const employees = this.state.employees.map(e => {
         if (e.status === 'pause' && e.pauseEndsAt <= now) {
           expired.push(e.name);
-          return { ...e, status: 'working', pauseType: null, pauseEndsAt: null, pauseTotal: null };
+          return { ...e, status: 'working', pauseType: null, pauseLabel: null, pauseEndsAt: null, pauseTotal: null };
         }
         return e;
       });
@@ -494,40 +605,154 @@ class Component extends DCLogic {
   componentWillUnmount() { clearInterval(this._timer); }
 
   buildEmployees() {
-    const base = Date.now();
     const palette = ['#4f8ef7','#2fbf71','#f5c542','#a78bfa','#f472b6','#22d3ee','#fb923c','#60a5fa','#34d399','#e879f9'];
-    const roles = ['Atendimento','Suporte N1','Retenção','Vendas','Backoffice','Cobrança','Ativo','Ouvidoria'];
-    const names = ['Ana Souza','Bruno Lima','Carla Mendes','Diego Rocha','Eduarda Alves','Felipe Castro','Gabriela Nunes','Henrique Dias','Isabela Ramos','João Pereira','Karina Melo','Lucas Barbosa','Mariana Costa','Nelson Farias','Olívia Teixeira','Paulo Cardoso','Rafael Moreira','Sabrina Lopes','Thiago Azevedo','Vitor Andrade','Wesley Pinto','Yara Ribeiro','Amanda Freitas','Camila Duarte','Rodrigo Prado','Larissa Vieira','Marcos Antunes','Patrícia Gomes'];
-    const list = names.map((n, i) => {
-      const j = (i % 3 === 0) ? '6h' : '8h';
-      const allowed = j === '6h' ? 1 : 3;
+    // Base: pausa_example.xlsx — [nome, turno, PAUSA 10, PAUSA 30, PAUSA 10]
+    // Os horários são de INÍCIO; o retorno é calculado (início + duração do tipo).
+    const raw = [
+      ['Ronan','MANHA','09:00','10:30',''],
+      ['Vanderlei','MANHA','09:00','10:30',''],
+      ['Gabriele','MANHA','09:15','11:05',''],
+      ['Lucca','MANHA','09:15','11:05',''],
+      ['Vitor','MANHA','09:15','11:05',''],
+      ['Jhuan','MANHA','09:30','11:40',''],
+      ['Miriam','MANHA','09:30','11:40',''],
+      ['Thais','MANHA','09:30','11:40',''],
+      ['Yasmin','MANHA','09:30','11:40',''],
+      ['Adriano','MANHA','09:45','12:15',''],
+      ['Stefani','MANHA','10:00','12:00','14:30'],
+      ['Thalia','MANHA','10:00','12:50',''],
+      ['Isadora','MANHA','10:00','12:50',''],
+      ['Giovani','TARDE','15:20','16:50',''],
+      ['Karolini','TARDE','15:20','16:50',''],
+      ['Stefani','TARDE','15:20','16:50',''],
+      ['Danielly','TARDE','15:35','17:25',''],
+      ['Enzo','TARDE','15:35','17:25',''],
+      ['Jeniffer','TARDE','15:35','17:25',''],
+      ['Ana','TARDE','15:50','18:00',''],
+      ['Jose','TARDE','15:50','18:00',''],
+      ['Kamila','TARDE','15:50','18:00',''],
+      ['Ana','TARDE','16:05','18:35',''],
+      ['Giovana','TARDE','16:05','18:35',''],
+      ['Matheus','TARDE','16:05','18:35',''],
+      ['Luiz','TARDE','16:05','19:10',''],
+      ['Isael','TARDE','16:20','19:10',''],
+      ['Jose','TARDE','16:20','19:10',''],
+      ['Luiz','TARDE','16:20','19:10',''],
+      ['Thamires','TARDE','16:20','19:10',''],
+    ];
+    const list = raw.map((r, i) => {
+      const [name, turnoX, p10a, p30, p10b] = r;
+      const turno = turnoX === 'TARDE' ? 'tarde' : 'manha';
+      const breaks = [];
+      if (p10a) breaks.push(this.mkBreak('10', p10a));
+      if (p30) breaks.push(this.mkBreak('30', p30));
+      if (p10b) breaks.push(this.mkBreak('10', p10b));
+      breaks.sort((a, b) => this.hhmmToMin(a.start) - this.hhmmToMin(b.start));
+      let jornada, jornadaSab;
+      if (turno === 'manha') {
+        // Equipes da manhã: 08:00 / 09:00 / 10:00 (deriva pelo 1º intervalo). Jornada = 6h20.
+        const f = breaks.length ? this.hhmmToMin(breaks[0].start) : 540;
+        const inicio = f < 585 ? '08:00' : (f < 615 ? '09:00' : '10:00');
+        const fim = this.addMin(inicio, 380);
+        jornada = { inicio, fim };
+        // Sábado da equipe da manhã: mesmo horário (equipe das 10:00 faz 09:00–15:20).
+        jornadaSab = inicio === '10:00' ? { inicio: '09:00', fim: '15:20' } : { inicio, fim };
+      } else {
+        // Tarde: seg–sex 14:20–20:40. Sábado trabalha de manhã (PLACEHOLDER — confirmar horários).
+        jornada = { inicio: '14:20', fim: '20:40' };
+        jornadaSab = { inicio: '08:00', fim: '14:20' };
+      }
       return {
-        id: i + 1, name: n, role: roles[i % roles.length],
-        cpf: this.fakeCpf(i), jornada: j, allowed, used: 0,
+        id: i + 1, name, turno, jornada, jornadaSab, breaks,
         status: 'working', color: palette[i % palette.length],
-        nextPauseAt: this.timeStr(9 + (i % 6), (i * 13) % 60),
+        pauseType: null, pauseLabel: null, pauseTotal: null, pauseEndsAt: null,
       };
     });
-    const pauses = [
-      { idx: 1, type: 'Descanso', total: 900, remaining: 512 },
-      { idx: 4, type: 'Almoço', total: 3600, remaining: 1874 },
-      { idx: 9, type: 'Descanso', total: 900, remaining: 138 },
-      { idx: 14, type: 'Descanso', total: 900, remaining: 741 },
-      { idx: 20, type: 'Almoço', total: 3600, remaining: 2337 },
+    // Amostras do turno INTEGRAL: seg–sex 08:00–17:02, sem sábado, pausas 10/60/10.
+    const integralSeed = [
+      ['Wesley', '10:00', '12:00', '15:00'],
+      ['Larissa', '10:20', '12:20', '15:20'],
+      ['Marcos', '10:40', '12:40', '15:40'],
+      ['Camila', '11:00', '13:00', '16:00'],
     ];
-    pauses.forEach(p => {
-      const e = list[p.idx];
-      if (e) { e.status = 'pause'; e.pauseType = p.type; e.pauseTotal = p.total; e.pauseEndsAt = base + p.remaining * 1000; e.used = 1; }
+    integralSeed.forEach((r, k) => {
+      const [name, b10a, b60, b10b] = r;
+      const breaks = [this.mkBreak('10', b10a), this.mkBreak('60', b60), this.mkBreak('10', b10b)];
+      list.push({
+        id: 100 + k, name, turno: 'integral',
+        jornada: { inicio: '08:00', fim: '17:02' }, jornadaSab: null, breaks,
+        status: 'working', color: palette[(list.length + k) % palette.length],
+        pauseType: null, pauseLabel: null, pauseTotal: null, pauseEndsAt: null,
+      });
     });
-    [6, 17].forEach(idx => { if (list[idx]) list[idx].used = list[idx].allowed; });
     return list;
   }
-  fakeCpf(i) {
-    const s = String(100000000 + i * 7654321).slice(0, 9).padStart(9, '0');
-    return s.slice(0,3) + '.' + s.slice(3,6) + '.' + s.slice(6,9) + '-' + String((i * 31) % 100).padStart(2, '0');
+  // Categorias de pausa: duração fixa por tipo (10/30/60). Retorno = início + duração.
+  mkBreak(type, start) {
+    const mins = type === '60' ? 60 : (type === '30' ? 30 : 10);
+    return { type, start, mins, label: 'Pausa ' + type, end: this.addMin(start, mins) };
+  }
+  // Config dos 3 turnos (rótulo, cor, se trabalha sábado).
+  turnoInfo(turno) {
+    const map = {
+      integral: { label: 'Integral', color: '#22d3ee', sabado: false },
+      manha: { label: 'Manhã', color: '#f5c542', sabado: true },
+      tarde: { label: 'Tarde', color: '#a78bfa', sabado: true },
+    };
+    return map[turno] || map.manha;
+  }
+  // Saturday rotation: teams alternate every week from a reference Saturday.
+  // Ref: 2026-07-11 (Saturday) = morning team by default. The editable
+  // `saturdayPhase` flips the order, affecting every future Saturday.
+  saturdayTeam(dateMs) {
+    const ref = new Date(2026, 6, 11).getTime(); // Sat 2026-07-11
+    const x = new Date(dateMs);
+    x.setDate(x.getDate() + (6 - x.getDay())); // move to that week's Saturday
+    x.setHours(0, 0, 0, 0);
+    const weeks = Math.round((x.getTime() - ref) / (7 * 86400000));
+    const phase = this.state.saturdayPhase || 0;
+    return ((((weeks + phase) % 2) + 2) % 2 === 0) ? 'manha' : 'tarde';
+  }
+  // Flip the rotation order (which team works). Re-orders all future Saturdays.
+  flipSaturdayRotation() {
+    this.setState(s => ({ saturdayPhase: (s.saturdayPhase || 0) === 0 ? 1 : 0 }));
+    this.toast('ok', 'Rodízio atualizado', 'A ordem dos sábados foi invertida');
+  }
+  // Is the operator on shift right now? (working day + within their schedule window)
+  isOnShift(e) {
+    const d = new Date(this.state.now);
+    const dow = d.getDay(); // 0=Sun..6=Sat
+    if (dow === 0) return false; // sunday: nobody
+    const nm = d.getHours() * 60 + d.getMinutes();
+    let schedule;
+    if (dow === 6) {
+      if (!this.turnoInfo(e.turno).sabado) return false; // integral: no saturday
+      if (this.saturdayTeam(this.state.now) !== e.turno) return false; // not this team's saturday
+      schedule = e.jornadaSab;
+    } else {
+      schedule = e.jornada;
+    }
+    if (!schedule) return false;
+    return nm >= this.hhmmToMin(schedule.inicio) && nm < this.hhmmToMin(schedule.fim);
+  }
+  // Current status: 'off' (out of shift) wins; else manual 'pause'; else 'working'.
+  computeStatus(e) {
+    if (!this.isOnShift(e)) return 'off';
+    return e.status === 'pause' ? 'pause' : 'working';
+  }
+  // Sábado (Date) da semana de uma data em ms.
+  saturdayOfWeek(dateMs) { const x = new Date(dateMs); x.setDate(x.getDate() + (6 - x.getDay())); x.setHours(0, 0, 0, 0); return x; }
+  hhmmToMin(t) { const p = String(t).split(':'); return (+p[0]) * 60 + (+p[1]); }
+  addMin(hhmm, mins) { let t = this.hhmmToMin(hhmm) + mins; t = ((t % 1440) + 1440) % 1440; return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
+  nowMin() { const d = new Date(this.state.now); return d.getHours() * 60 + d.getMinutes(); }
+  nextBreak(emp) {
+    if (!emp.breaks || !emp.breaks.length) return null;
+    const nm = this.nowMin();
+    const up = emp.breaks.filter(b => this.hhmmToMin(b.start) > nm);
+    return up.length ? up[0] : emp.breaks[0];
   }
   timeStr(h, m) { return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0'); }
-  initials(n) { const p = n.trim().split(' '); return (p[0][0] + (p[p.length-1][0] || '')).toUpperCase(); }
+  initials(n) { const p = String(n).trim().split(/\s+/); return (p.length > 1 ? (p[0][0] + p[p.length-1][0]) : String(n).slice(0,2)).toUpperCase(); }
   fmt(secs) { secs = Math.max(0, secs); const m = Math.floor(secs / 60); const s = secs % 60; return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0'); }
   avatarStyle(color, size) {
     size = size || 32;
@@ -548,10 +773,14 @@ class Component extends DCLogic {
   }
 
   // Abre o dialog de confirmação antes de iniciar/finalizar uma pausa.
+  // Ao iniciar, a pausa usada é a PRÓXIMA agendada (com seu tipo/duração).
   askConfirm(id, action) {
     const emp = this.state.employees.find(e => e.id === id);
     if (!emp) return;
-    this.setState({ confirm: { id, action, name: emp.name } });
+    let label = 'pausa';
+    if (action === 'start') { const nb = this.nextBreak(emp); label = nb ? nb.label : 'Pausa 10'; }
+    else if (emp.pauseLabel) { label = emp.pauseLabel; }
+    this.setState({ confirm: { id, action, name: emp.name, label } });
   }
   runConfirm() {
     const c = this.state.confirm;
@@ -562,43 +791,153 @@ class Component extends DCLogic {
   }
 
   startPause(id) {
-    this.setState(s => ({
-      employees: s.employees.map(e => {
-        if (e.id !== id || e.status === 'pause' || (e.allowed - e.used) <= 0) return e;
-        const type = (e.jornada === '8h' && e.used === 0) ? 'Almoço' : 'Descanso';
-        const total = type === 'Almoço' ? 3600 : 900;
-        return { ...e, status: 'pause', pauseType: type, pauseTotal: total, pauseEndsAt: Date.now() + total * 1000, used: e.used + 1 };
-      }),
-    }));
     const emp = this.state.employees.find(e => e.id === id);
-    if (emp) this.toast('warn', 'Pausa iniciada', emp.name + ' entrou em pausa');
+    if (!emp || emp.status === 'pause') return;
+    const nb = this.nextBreak(emp) || { type: '10', label: 'Pausa 10', mins: 10 };
+    const total = nb.mins * 60;
+    const endsAt = Date.now() + total * 1000;
+    this.setState(s => ({
+      employees: s.employees.map(e => e.id === id
+        ? { ...e, status: 'pause', pauseType: nb.type, pauseLabel: nb.label, pauseTotal: total, pauseEndsAt: endsAt }
+        : e),
+    }));
+    this.toast('warn', nb.label + ' iniciada', emp.name + ' entrou em pausa de ' + nb.mins + ' min');
   }
   finishPause(id) {
     const emp = this.state.employees.find(e => e.id === id);
-    this.setState(s => ({ employees: s.employees.map(e => e.id === id ? { ...e, status: 'working', pauseType: null, pauseEndsAt: null, pauseTotal: null } : e) }));
-    if (emp) this.toast('ok', 'Pausa finalizada', emp.name + ' voltou a trabalhar');
+    this.setState(s => ({ employees: s.employees.map(e => e.id === id ? { ...e, status: 'working', pauseType: null, pauseLabel: null, pauseEndsAt: null, pauseTotal: null } : e) }));
+    if (emp) this.toast('ok', 'Pausa concluída', emp.name + ' voltou a trabalhar');
   }
 
-  // ---- import flow ----
-  simulateFile() { this.setState({ importStage: 'preview', importFile: { name: 'funcionarios_novembro.xlsx', size: '48 KB', rows: 42, valid: 38, duplicate: 2, invalid: 2 } }); }
-  runImport() {
-    this.setState({ importStage: 'running', importProgress: 0 });
-    const iv = setInterval(() => {
-      this.setState(s => {
-        const p = Math.min(100, s.importProgress + Math.round(6 + Math.random() * 10));
-        if (p >= 100) { clearInterval(iv); setTimeout(() => this.setState({ importStage: 'report' }), 400); }
-        return { importProgress: p };
-      });
-    }, 180);
+  // ---- Importar / Exportar Excel (real, via processo principal) ----
+  // Nome próprio: primeira letra maiúscula, resto minúsculo (planilha é UPPERCASE).
+  titleName(n) { return String(n).toLowerCase().replace(/(^|\s)\p{L}/gu, c => c.toUpperCase()); }
+  operatorsFromImport(rows) {
+    const palette = ['#4f8ef7','#2fbf71','#f5c542','#a78bfa','#f472b6','#22d3ee','#fb923c','#60a5fa','#34d399','#e879f9'];
+    return rows.map((r, i) => {
+      const turno = r.turno === 'integral' ? 'integral' : (r.turno === 'tarde' ? 'tarde' : 'manha');
+      const breaks = [];
+      if (r.p10a) breaks.push(this.mkBreak('10', r.p10a));
+      if (r.p30) breaks.push(this.mkBreak('30', r.p30));
+      if (r.p60) breaks.push(this.mkBreak('60', r.p60));
+      if (r.p10b) breaks.push(this.mkBreak('10', r.p10b));
+      breaks.sort((a, b) => this.hhmmToMin(a.start) - this.hhmmToMin(b.start));
+      const jornada = { inicio: r.entrada || '08:00', fim: r.saida || '17:00' };
+      const jornadaSab = turno === 'integral'
+        ? null
+        : ((r.sabEntrada && r.sabSaida) ? { inicio: r.sabEntrada, fim: r.sabSaida } : { inicio: jornada.inicio, fim: jornada.fim });
+      return {
+        id: Date.now() + i, name: this.titleName(r.operador), turno, jornada, jornadaSab, breaks,
+        status: 'working', color: palette[i % palette.length],
+        pauseType: null, pauseLabel: null, pauseTotal: null, pauseEndsAt: null,
+      };
+    });
+  }
+  downloadTemplate() {
+    if (!(window.electronAPI && window.electronAPI.downloadTemplate)) { this.toast('err', 'Indisponível', 'Disponível apenas no app desktop'); return; }
+    window.electronAPI.downloadTemplate().then(res => {
+      if (res && res.ok) this.toast('ok', 'Modelo salvo', 'Preencha e importe pela tela de Importação');
+    }).catch(() => {});
+  }
+  importExcel() {
+    if (!(window.electronAPI && window.electronAPI.importExcel)) { this.toast('err', 'Indisponível', 'A importação só funciona no app desktop'); return; }
+    window.electronAPI.importExcel().then(res => {
+      if (!res) return; // cancelado
+      if (res.error) { this.toast('err', 'Falha ao importar', res.error); return; }
+      if (!res.rows || !res.rows.length) { this.toast('warn', 'Nada importado', 'Nenhum operador encontrado na planilha'); return; }
+      const emps = this.operatorsFromImport(res.rows);
+      this.setState({ employees: emps, screen: 'trab', cadastroOpen: false });
+      this.toast('ok', 'Escala importada', emps.length + ' operadores de ' + res.fileName);
+    }).catch(err => this.toast('err', 'Falha ao importar', String(err && err.message || err)));
+  }
+  // Exportar está desabilitado na versão beta — mostra um aviso.
+  exportExcel() { this.setState({ betaOpen: true }); }
+  // Exportação real (pronta; será religada numa versão futura).
+  doExportExcel() {
+    if (!(window.electronAPI && window.electronAPI.exportExcel)) { this.toast('err', 'Indisponível', 'A exportação só funciona no app desktop'); return; }
+    const rows = this.state.employees.map(e => {
+      const t10 = e.breaks.filter(b => b.type === '10').map(b => b.start);
+      const t30 = e.breaks.filter(b => b.type === '30').map(b => b.start);
+      return { operador: String(e.name).toUpperCase(), turno: e.turno, p10a: t10[0] || '-', p30: t30[0] || '-', p10b: t10[1] || '-' };
+    });
+    window.electronAPI.exportExcel({ rows }).then(res => {
+      if (res && res.ok) this.toast('ok', 'Escala exportada', rows.length + ' operadores salvos em Excel');
+      else if (res && res.error) this.toast('err', 'Falha ao exportar', res.error);
+    }).catch(err => this.toast('err', 'Falha ao exportar', String(err && err.message || err)));
+  }
+
+  // Cadastro presets per shift/team — auto-fill schedule + breaks to speed up.
+  // Break start times are sensible defaults (editable) since the source only
+  // gives the workday hours and break types, not exact break times.
+  shiftPresets() {
+    return {
+      integral: [
+        { label: 'Integral · 08:00–17:02 (pausas 10/60/10)', jornada: { inicio: '08:00', fim: '17:02' }, jornadaSab: null, breaks: [{ type: '10', start: '10:00' }, { type: '60', start: '12:00' }, { type: '10', start: '15:00' }] },
+      ],
+      manha: [
+        { label: 'Equipe 1 · 08:00–14:20 (sáb 08:00–14:20)', jornada: { inicio: '08:00', fim: '14:20' }, jornadaSab: { inicio: '08:00', fim: '14:20' }, breaks: [{ type: '10', start: '10:00' }, { type: '30', start: '12:00' }] },
+        { label: 'Equipe 2 · 09:00–15:20 (sáb 09:00–15:20)', jornada: { inicio: '09:00', fim: '15:20' }, jornadaSab: { inicio: '09:00', fim: '15:20' }, breaks: [{ type: '10', start: '11:00' }, { type: '30', start: '13:00' }] },
+        { label: 'Equipe 3 · 10:00–16:20 (sáb 09:00–15:20)', jornada: { inicio: '10:00', fim: '16:20' }, jornadaSab: { inicio: '09:00', fim: '15:20' }, breaks: [{ type: '10', start: '12:00' }, { type: '30', start: '14:00' }] },
+      ],
+      tarde: [
+        { label: 'Tarde · 14:20–20:40 (sáb 08:00–14:20)', jornada: { inicio: '14:20', fim: '20:40' }, jornadaSab: { inicio: '08:00', fim: '14:20' }, breaks: [{ type: '10', start: '16:20' }, { type: '30', start: '18:30' }] },
+        { label: 'Tarde · 14:20–20:40 (sáb 09:00–15:20)', jornada: { inicio: '14:20', fim: '20:40' }, jornadaSab: { inicio: '09:00', fim: '15:20' }, breaks: [{ type: '10', start: '16:20' }, { type: '30', start: '18:30' }] },
+      ],
+    };
+  }
+  // Apply a preset to the form (fills schedule + breaks). Called on shift/team change.
+  applyPreset(turno, idx) {
+    const list = this.shiftPresets()[turno] || this.shiftPresets().manha;
+    const preset = list[idx] || list[0];
+    if (!preset) return;
+    this.setState(s => ({ form: {
+      ...s.form,
+      turno,
+      presetIndex: list.indexOf(preset),
+      jornadaInicio: preset.jornada.inicio,
+      jornadaFim: preset.jornada.fim,
+      sabInicio: preset.jornadaSab ? preset.jornadaSab.inicio : s.form.sabInicio,
+      sabFim: preset.jornadaSab ? preset.jornadaSab.fim : s.form.sabFim,
+      breaks: preset.breaks.map(b => this.mkBreak(b.type, b.start)),
+    } }));
+  }
+  // Open the register modal with a fresh, preset-filled form.
+  openCadastro() {
+    const preset = this.shiftPresets().manha[0];
+    this.setState({ cadastroOpen: true, form: {
+      nome: '', turno: 'manha', presetIndex: 0,
+      jornadaInicio: preset.jornada.inicio, jornadaFim: preset.jornada.fim,
+      sabInicio: preset.jornadaSab.inicio, sabFim: preset.jornadaSab.fim,
+      breaks: preset.breaks.map(b => this.mkBreak(b.type, b.start)),
+      newType: '10', newStart: '',
+    } });
+  }
+
+  // Adiciona uma pausa ao formulário: escolhe tipo + horário de início; o
+  // retorno é calculado (início + duração do tipo). Sem registrar o fim.
+  addFormBreak() {
+    const f = this.state.form;
+    if (!/^\d{1,2}:\d{2}$/.test(f.newStart)) return;
+    const b = this.mkBreak(f.newType, f.newStart);
+    this.setState(s => ({ form: { ...s.form, breaks: [...s.form.breaks, b].sort((a, c) => this.hhmmToMin(a.start) - this.hhmmToMin(c.start)), newStart: '' } }));
+  }
+  removeFormBreak(i) {
+    this.setState(s => ({ form: { ...s.form, breaks: s.form.breaks.filter((_, k) => k !== i) } }));
   }
   saveCadastro() {
     const f = this.state.form;
-    if (!f.nome.trim() || f.cpf.replace(/\D/g,'').length < 11) return;
-    const allowed = f.jornada === '6h' ? 1 : 3;
-    const palette = ['#4f8ef7','#2fbf71','#f5c542','#a78bfa','#f472b6','#22d3ee','#fb923c'];
-    const emp = { id: Date.now(), name: f.nome.trim(), role: 'Novo cadastro', cpf: f.cpf, jornada: f.jornada, allowed, used: 0, status: 'working', color: palette[Math.floor(Math.random()*palette.length)], nextPauseAt: 'Disponível' };
-    this.setState(s => ({ employees: [emp, ...s.employees], cadastroOpen: false, form: { nome: '', cpf: '', jornada: '6h' } }));
-    this.toast('ok', 'Funcionário cadastrado', f.nome.trim() + ' foi adicionado');
+    if (!f.nome.trim()) return;
+    const palette = ['#4f8ef7','#2fbf71','#f5c542','#a78bfa','#f472b6','#22d3ee','#fb923c','#60a5fa','#34d399','#e879f9'];
+    const emp = {
+      id: Date.now(), name: f.nome.trim(), turno: f.turno,
+      jornada: { inicio: f.jornadaInicio, fim: f.jornadaFim },
+      jornadaSab: f.turno === 'integral' ? null : { inicio: f.sabInicio, fim: f.sabFim },
+      breaks: f.breaks.map(b => this.mkBreak(b.type, b.start)),
+      status: 'working', color: palette[Math.floor(Math.random() * palette.length)],
+      pauseType: null, pauseLabel: null, pauseTotal: null, pauseEndsAt: null,
+    };
+    this.setState(s => ({ employees: [emp, ...s.employees], cadastroOpen: false, form: { nome: '', turno: 'manha', presetIndex: 0, jornadaInicio: '08:00', jornadaFim: '14:20', sabInicio: '08:00', sabFim: '14:20', breaks: [], newType: '10', newStart: '' } }));
+    this.toast('ok', 'Operador cadastrado', f.nome.trim() + ' foi adicionado');
   }
 
   chip(active) {
@@ -613,18 +952,20 @@ class Component extends DCLogic {
     const now = st.now;
     const emps = st.employees;
     const scr = st.screen;
-    // Cada tela de lista é um filtro de status: 'trab' = trabalhando, 'pausa' = em pausa.
-    const statusView = scr === 'trab' ? 'working' : 'pause';
-    const working = emps.filter(e => e.status === 'working').length;
-    const onPause = emps.filter(e => e.status === 'pause').length;
-    const pauseSecs = emps.filter(e => e.status === 'pause').map(e => Math.max(0, Math.round((e.pauseEndsAt - now) / 1000)));
+    // Each list screen filters by computed status: 'working' | 'pause' | 'off'.
+    const statusView = scr === 'trab' ? 'working' : (scr === 'fora' ? 'off' : 'pause');
+    const statusOf = e => this.computeStatus(e);
+    const working = emps.filter(e => statusOf(e) === 'working').length;
+    const onPause = emps.filter(e => statusOf(e) === 'pause').length;
+    const offShift = emps.filter(e => statusOf(e) === 'off').length;
+    const pauseSecs = emps.filter(e => statusOf(e) === 'pause').map(e => Math.max(0, Math.round((e.pauseEndsAt - now) / 1000)));
     const avg = pauseSecs.length ? Math.round(pauseSecs.reduce((a, b) => a + b, 0) / pauseSecs.length) : 0;
 
-    // Linhas da lista — filtradas pelo status da tela atual (Em pausa / Trabalhando).
+    // List rows — filtered by the current screen's computed status.
     let filtered = emps.filter(e => {
       const q = st.search.trim().toLowerCase();
-      const matchQ = !q || e.name.toLowerCase().includes(q) || e.cpf.includes(q);
-      return matchQ && e.status === statusView;
+      const matchQ = !q || e.name.toLowerCase().includes(q);
+      return matchQ && statusOf(e) === statusView;
     });
     filtered = filtered.slice().sort((a, b) => st.sortDir === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
 
@@ -632,61 +973,68 @@ class Component extends DCLogic {
     const pauseBadge = { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, background: 'rgba(234,179,8,.13)', color: '#f5c542', border: '1px solid rgba(234,179,8,.28)' };
     const dot = c => ({ width: '6px', height: '6px', borderRadius: '50%', background: c });
 
+    // Cor por categoria: Pausa 10 = âmbar, Pausa 30 = violeta.
+    const catColor = t => t === '60' ? '#60a5fa' : (t === '30' ? '#a78bfa' : '#f5c542');
+    const catBadge = c => ({ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, background: c + '22', color: c, border: '1px solid ' + c + '55' });
+    const offBadge = { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, background: 'rgba(138,145,155,.12)', color: '#9aa1ab', border: '1px solid rgba(138,145,155,.25)' };
     const rows = filtered.map(e => {
-      const isPause = e.status === 'pause';
-      const left = e.allowed - e.used;
+      const status = statusOf(e); // 'working' | 'pause' | 'off'
+      const isPause = status === 'pause';
+      const isOff = status === 'off';
       const rem = isPause ? Math.max(0, Math.round((e.pauseEndsAt - now) / 1000)) : 0;
-      let actionLabel, actionStyle, actionDisabled, onAction;
+      const nb = this.nextBreak(e);
+      const cc = isPause ? catColor(e.pauseType) : (isOff ? '#8a919b' : '#2fbf71');
       const btn = { width: '100%', padding: '9px 13px', borderRadius: '9px', fontSize: '13px', fontWeight: 600 };
-      if (isPause) {
-        actionLabel = 'Finalizar pausa'; actionDisabled = false; onAction = () => this.askConfirm(e.id, 'finish');
-        actionStyle = { ...btn, border: 'none', background: '#f5c542', color: '#1a1400', cursor: 'pointer' };
-      } else if (left > 0) {
-        actionLabel = 'Iniciar pausa'; actionDisabled = false; onAction = () => this.askConfirm(e.id, 'start');
-        actionStyle = { ...btn, border: '1px solid #2a5aa8', background: 'rgba(79,142,247,.14)', color: '#6aa8ff', cursor: 'pointer' };
-      } else {
-        actionLabel = 'Sem pausas disponíveis'; actionDisabled = true; onAction = () => {};
+      let actionLabel, actionStyle, onAction, actionDisabled = false;
+      let statusLabel, statusStyle, metaLabel, metaValue, timerColor;
+      if (isOff) {
+        actionLabel = 'Fora do expediente'; actionDisabled = true; onAction = () => {};
         actionStyle = { ...btn, border: '1px solid #23272e', background: '#0e0f12', color: '#4a505a', cursor: 'not-allowed' };
+        statusLabel = 'Fora'; statusStyle = offBadge;
+        metaLabel = 'PRÓXIMA ENTRADA'; metaValue = e.jornada ? e.jornada.inicio : '—'; timerColor = '#8a919b';
+      } else if (isPause) {
+        actionLabel = 'Finalizar pausa'; onAction = () => this.askConfirm(e.id, 'finish');
+        actionStyle = { ...btn, border: 'none', background: '#f5c542', color: '#1a1400', cursor: 'pointer' };
+        statusLabel = e.pauseLabel || 'Em pausa'; statusStyle = catBadge(cc);
+        metaLabel = 'EM ' + (e.pauseLabel || 'PAUSA').toUpperCase(); metaValue = this.fmt(rem); timerColor = rem < 60 ? '#ef4444' : cc;
+      } else {
+        actionLabel = 'Iniciar pausa'; onAction = () => this.askConfirm(e.id, 'start');
+        actionStyle = { ...btn, border: '1px solid #2a5aa8', background: 'rgba(79,142,247,.14)', color: '#6aa8ff', cursor: 'pointer' };
+        statusLabel = 'Trabalhando'; statusStyle = workBadge;
+        metaLabel = nb ? ('PRÓXIMA · ' + nb.label.toUpperCase()) : 'SEM PAUSAS'; metaValue = nb ? (nb.start + ' → ' + nb.end) : '—'; timerColor = '#c5c9cf';
       }
+      const info = this.turnoInfo(e.turno);
+      const jornadaText = e.jornada ? (e.jornada.inicio + '–' + e.jornada.fim) : '—';
+      const pausasText = e.breaks.length ? e.breaks.map(b => b.start).join(' · ') : '—';
       const cardBorder = isPause ? '#3a3110' : '#1c1f25';
       return {
-        id: e.id, name: e.name, role: e.role, cpf: e.cpf, jornada: e.jornada,
+        id: e.id, name: e.name,
+        turnoLabel: info.label,
+        turnoChipStyle: { display: 'inline-flex', alignItems: 'center', marginTop: '3px', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, background: info.color + '1f', color: info.color, border: '1px solid ' + info.color + '44' },
+        jornadaText, pausasText,
         initials: this.initials(e.name), avatarStyle: this.avatarStyle(e.color), avatarLg: this.avatarStyle(e.color, 42),
         isPause,
         cardStyle: { background: '#101216', border: '1px solid ' + cardBorder, borderRadius: '14px', padding: '16px', transition: 'border-color .12s' },
-        statusLabel: isPause ? 'Em pausa' : 'Trabalhando',
-        statusStyle: isPause ? pauseBadge : workBadge,
-        dotStyle: dot(isPause ? '#f5c542' : '#2fbf71'),
-        metaLabel: isPause ? 'TEMPO RESTANTE' : 'PRÓXIMA PAUSA',
-        metaValue: isPause ? this.fmt(rem) : e.nextPauseAt,
-        timerColor: isPause ? (rem < 60 ? '#ef4444' : '#f5c542') : '#c5c9cf',
+        statusLabel, statusStyle,
+        dotStyle: dot(cc),
+        metaLabel, metaValue, timerColor,
         actionLabel, actionStyle, actionDisabled, onAction,
       };
     });
 
-    // import
-    const f = st.importFile || { name: '', size: '', rows: 0, valid: 0, duplicate: 0, invalid: 0 };
-    const importIssues = [
-      { tag: 'Inválido', tagStyle: this.tagStyle('#ef4444'), line: 14, msg: 'CPF com número de dígitos incorreto (10 dígitos)' },
-      { tag: 'Inválido', tagStyle: this.tagStyle('#ef4444'), line: 27, msg: 'Campo "Nome" vazio' },
-      { tag: 'Duplicado', tagStyle: this.tagStyle('#f5c542'), line: 31, msg: 'CPF já cadastrado no sistema' },
-      { tag: 'Duplicado', tagStyle: this.tagStyle('#f5c542'), line: 39, msg: 'CPF repetido dentro da planilha' },
-    ];
-
     // history
-    const histNames = ['Ana Souza','Bruno Lima','Carla Mendes','Diego Rocha','João Pereira','Mariana Costa','Felipe Castro','Karina Melo','Lucas Barbosa','Olívia Teixeira','Rafael Moreira','Thiago Azevedo'];
-    const histColors = ['#4f8ef7','#2fbf71','#f5c542','#a78bfa','#f472b6','#22d3ee'];
-    const histData = histNames.map((n, i) => {
-      const type = i % 3 === 0 ? 'Almoço' : 'Descanso';
-      const sh = 8 + (i % 8), sm = (i * 11) % 60;
-      const dur = type === 'Almoço' ? 60 : 15;
-      const em = sm + dur; const eh = sh + Math.floor(em / 60);
-      const over = i % 5 === 0 && type === 'Descanso';
+    // Histórico (amostra) derivado dos operadores reais e das categorias Pausa 10/30.
+    const histData = emps.slice(0, 14).map((e, i) => {
+      const b = (e.breaks && e.breaks.length) ? e.breaks[i % e.breaks.length] : this.mkBreak('10', '09:00');
+      const isLong = b.type === '30';
+      const over = i % 6 === 0; // alguns estouraram o tempo
+      const dispDur = (isLong ? 30 : 10) + (over ? 3 : 0);
+      const c = isLong ? '#a78bfa' : '#f5c542';
       return {
-        name: n, initials: this.initials(n), avatarStyle: this.avatarStyle(histColors[i % histColors.length], 28),
-        type, tagStyle: type === 'Almoço' ? this.tagStyle('#a78bfa') : this.tagStyle('#4f8ef7'),
-        date: '0' + (5 - (i % 5)) + '/07', start: this.timeStr(sh, sm), end: this.timeStr(eh, em % 60),
-        duration: (over ? (dur + 3) : dur) + ':00', durColor: over ? '#ef4444' : '#c5c9cf',
+        name: e.name, initials: this.initials(e.name), avatarStyle: this.avatarStyle(e.color, 28),
+        type: b.label, tagStyle: this.tagStyle(c),
+        date: '0' + (5 - (i % 5)) + '/07', start: b.start, end: this.addMin(b.start, dispDur),
+        duration: String(dispDur).padStart(2, '0') + ':00', durColor: over ? '#ef4444' : '#c5c9cf',
       };
     });
     const hq = st.histSearch.trim().toLowerCase();
@@ -706,8 +1054,10 @@ class Component extends DCLogic {
     const titles = {
       pausa: ['Em pausa', 'Funcionários atualmente em pausa'],
       trab: ['Trabalhando', 'Funcionários atualmente trabalhando'],
+      fora: ['Fora do expediente', 'Operadores fora da jornada agora'],
       import: ['Importação via Excel', 'Cadastre vários funcionários de uma vez'],
       historico: ['Histórico de pausas', 'Todas as pausas realizadas'],
+      creditos: ['Créditos', 'Equipe e contato'],
     };
     const title = titles[scr] || titles.pausa;
     const collapsed = st.menuCollapsed;
@@ -717,17 +1067,56 @@ class Component extends DCLogic {
         background: active ? 'rgba(79,142,247,.13)' : 'transparent', color: active ? '#8cbcff' : '#9aa1ab' };
     };
 
-    const fdis = !st.form.nome.trim() || st.form.cpf.replace(/\D/g,'').length < 11;
+    const fdis = !st.form.nome.trim();
+    const canAddBreak = /^\d{1,2}:\d{2}$/.test(st.form.newStart);
+
+    // Rodízio de sábado: equipe que trabalha no próximo sábado.
+    const satTeam = this.saturdayTeam(now);
+    const satInfo = this.turnoInfo(satTeam);
+    const satDate = this.saturdayOfWeek(now);
+    const satStr = ('0' + satDate.getDate()).slice(-2) + '/' + ('0' + (satDate.getMonth() + 1)).slice(-2);
+    // Próximos sábados (para o modal do rodízio).
+    const satList = [];
+    for (let i = 0; i < 8; i++) {
+      const d = new Date(satDate); d.setDate(d.getDate() + i * 7);
+      const team = this.saturdayTeam(d.getTime());
+      const inf = this.turnoInfo(team);
+      satList.push({
+        dateStr: ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(),
+        teamLabel: inf.label, isNow: i === 0,
+        chipStyle: { display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '4px 11px', borderRadius: '20px', fontSize: '12.5px', fontWeight: 700, background: inf.color + '1f', color: inf.color, border: '1px solid ' + inf.color + '44' },
+        dotStyle: { width: '7px', height: '7px', borderRadius: '50%', background: inf.color },
+      });
+    }
 
     return {
       // nav / chrome
       goPausaView: () => this.setState({ screen: 'pausa', search: '' }),
       goTrabView: () => this.setState({ screen: 'trab', search: '' }),
+      goForaView: () => this.setState({ screen: 'fora', search: '' }),
       goImport: () => this.setState({ screen: 'import' }),
       goHistorico: () => this.setState({ screen: 'historico' }),
-      navPausaStyle: navStyle('pausa'), navTrabStyle: navStyle('trab'), navImpStyle: navStyle('import'), navHistStyle: navStyle('historico'),
+      goCreditos: () => this.setState({ screen: 'creditos' }),
+      navPausaStyle: navStyle('pausa'), navTrabStyle: navStyle('trab'), navForaStyle: navStyle('fora'), navImpStyle: navStyle('import'), navHistStyle: navStyle('historico'), navCredStyle: navStyle('creditos'),
+
+      // modal "Versão beta" (ex.: ao clicar em Exportar)
+      betaOpen: st.betaOpen,
+      closeBeta: () => this.setState({ betaOpen: false }),
+
+      // Saturday rotation: header chip + sidebar button + modal.
+      saturdayText: 'Sáb ' + satStr + ' · ' + satInfo.label,
+      saturdayChipStyle: { display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '7px 12px', borderRadius: '9px', background: '#121419', border: '1px solid ' + satInfo.color + '44', fontSize: '12.5px', color: satInfo.color, fontWeight: 600, whiteSpace: 'nowrap', cursor: 'pointer', transition: 'filter .12s' },
+      saturdayDot: { width: '7px', height: '7px', flex: '0 0 7px', borderRadius: '50%', background: satInfo.color },
+      saturdayModalOpen: st.satInfoOpen,
+      openSaturdayModal: () => this.setState({ satInfoOpen: true }),
+      closeSaturdayModal: () => this.setState({ satInfoOpen: false }),
+      flipSaturday: () => this.flipSaturdayRotation(),
+      saturdaysList: satList,
+      mailWesley: (e) => { if (e && e.preventDefault) e.preventDefault(); try { window.electronAPI && window.electronAPI.openExternal && window.electronAPI.openExternal('mailto:wesley@wesleydev.com'); } catch (err) {} },
+      mailIsa: (e) => { if (e && e.preventDefault) e.preventDefault(); try { window.electronAPI && window.electronAPI.openExternal && window.electronAPI.openExternal('mailto:isa@gmail.com'); } catch (err) {} },
       pauseBadgeStyle: { minWidth: '20px', height: '20px', padding: '0 6px', borderRadius: '10px', background: onPause ? 'rgba(234,179,8,.2)' : '#1c1f25', color: onPause ? '#f5c542' : '#6b727c', fontSize: '11.5px', fontWeight: 700, display: collapsed ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center' },
       workBadgeStyle: { minWidth: '20px', height: '20px', padding: '0 6px', borderRadius: '10px', background: working ? 'rgba(47,191,113,.18)' : '#1c1f25', color: working ? '#4ad991' : '#6b727c', fontSize: '11.5px', fontWeight: 700, display: collapsed ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center' },
+      offBadgeStyle: { minWidth: '20px', height: '20px', padding: '0 6px', borderRadius: '10px', background: offShift ? 'rgba(138,145,155,.18)' : '#1c1f25', color: offShift ? '#9aa1ab' : '#6b727c', fontSize: '11.5px', fontWeight: 700, display: collapsed ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center' },
 
       // menu retrátil (expandido <-> só ícones)
       toggleMenu: () => this.setState(s => ({ menuCollapsed: !s.menuCollapsed })),
@@ -748,17 +1137,28 @@ class Component extends DCLogic {
       offlineTextStyle: { fontSize: '11.5px', lineHeight: 1.35, display: collapsed ? 'none' : 'block', overflow: 'hidden' },
       screenTitle: title[0], screenSubtitle: title[1],
       todayStr: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
-      isList: scr === 'pausa' || scr === 'trab', isImport: scr === 'import', isHistorico: scr === 'historico',
+      isList: scr === 'pausa' || scr === 'trab' || scr === 'fora', isImport: scr === 'import', isHistorico: scr === 'historico', isCreditos: scr === 'creditos',
 
       // kpis
-      kpis: { working, onPause, total: emps.length, avgPause: avg ? this.fmt(avg) : '--:--' },
+      kpis: { working, onPause, off: offShift, total: emps.length, avgPause: avg ? this.fmt(avg) : '--:--' },
 
       // lista por status
       search: st.search,
       setSearch: (e) => this.setState({ search: e.target.value }),
-      listLabel: scr === 'trab' ? 'TRABALHANDO' : 'EM PAUSA',
-      emptyTitle: st.search.trim() ? 'Nenhum funcionário encontrado' : (scr === 'trab' ? 'Nenhum funcionário trabalhando' : 'Nenhum funcionário em pausa'),
-      emptySubtitle: st.search.trim() ? 'Ajuste a busca ou confira o outro status.' : (scr === 'trab' ? 'Nenhum colaborador está trabalhando no momento.' : 'Nenhum colaborador está em pausa no momento.'),
+      importExcel: () => this.importExcel(),
+      exportExcel: () => this.exportExcel(),
+      downloadTemplate: () => this.downloadTemplate(),
+      templatePreview: [
+        'OPERADOR,TURNO,ENTRADA,SAIDA,SABADO ENTRADA,SABADO SAIDA,PAUSA 10,PAUSA 30,PAUSA 60,PAUSA 10 (2a)',
+        'Maria Souza,integral,08:00,17:02,-,-,10:00,-,12:00,15:00',
+        'Joao Lima,manha,08:00,14:20,08:00,14:20,10:00,12:00,-,-',
+        'Ana Pereira,manha,10:00,16:20,09:00,15:20,12:00,14:00,-,-',
+        'Pedro Rocha,tarde,14:20,20:40,08:00,14:20,16:20,18:30,-,-',
+        'Lucas Alves,tarde,14:20,20:40,09:00,15:20,16:20,18:30,-,-',
+      ].join('\n'),
+      listLabel: scr === 'trab' ? 'TRABALHANDO' : (scr === 'fora' ? 'FORA DO EXPEDIENTE' : 'EM PAUSA'),
+      emptyTitle: st.search.trim() ? 'Nenhum funcionário encontrado' : (scr === 'trab' ? 'Nenhum funcionário trabalhando' : (scr === 'fora' ? 'Ninguém fora do expediente' : 'Nenhum funcionário em pausa')),
+      emptySubtitle: st.search.trim() ? 'Ajuste a busca ou confira o outro status.' : (scr === 'trab' ? 'Nenhum colaborador está trabalhando no momento.' : (scr === 'fora' ? 'Todos os operadores estão em expediente agora.' : 'Nenhum colaborador está em pausa no momento.')),
       toggleSort: () => this.setState(s => ({ sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' })),
       sortArrow: st.sortDir === 'asc' ? '↑' : '↓',
       loading: st.loading,
@@ -768,23 +1168,6 @@ class Component extends DCLogic {
       showEmpty: !st.loading && rows.length === 0,
       visibleCount: rows.length,
 
-      // import
-      importIdle: st.importStage === 'idle',
-      importPreview: st.importStage === 'preview',
-      importRunning: st.importStage === 'running',
-      importDone: st.importStage === 'report',
-      dropStyle: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '54px 24px', borderRadius: '18px', border: '2px dashed ' + (st.dragOver ? '#4f8ef7' : '#2a2f37'), background: st.dragOver ? 'rgba(79,142,247,.06)' : '#101216', cursor: 'pointer', transition: 'all .15s' },
-      onDragOver: (e) => { e.preventDefault(); if (!st.dragOver) this.setState({ dragOver: true }); },
-      onDropFile: (e) => { e.preventDefault(); this.setState({ dragOver: false }); this.simulateFile(); },
-      onSelectFile: () => this.simulateFile(),
-      onResetImport: () => this.setState({ importStage: 'idle', importFile: null, importProgress: 0 }),
-      onStartImport: () => this.runImport(),
-      onFinishImport: () => this.setState({ screen: 'pausa', importStage: 'idle', importFile: null }),
-      importFileName: f.name, importFileSize: f.size, importFileRows: f.rows,
-      prev: { valid: f.valid, duplicate: f.duplicate, invalid: f.invalid },
-      importProgress: st.importProgress,
-      progressBarStyle: { width: st.importProgress + '%', height: '100%', background: 'linear-gradient(90deg,#4f8ef7,#6aa8ff)', borderRadius: '8px', transition: 'width .18s ease' },
-      importIssues,
 
       // history
       histSearch: st.histSearch,
@@ -795,13 +1178,35 @@ class Component extends DCLogic {
 
       // cadastro
       cadastroOpen: st.cadastroOpen,
-      openCadastro: () => this.setState({ cadastroOpen: true }),
+      openCadastro: () => this.openCadastro(),
       closeCadastro: () => this.setState({ cadastroOpen: false }),
       stop: (e) => e.stopPropagation(),
       form: st.form,
       setNome: (e) => this.setState(s => ({ form: { ...s.form, nome: e.target.value } })),
-      setCpf: (e) => this.setState(s => ({ form: { ...s.form, cpf: this.maskCpf(e.target.value) } })),
-      setJornada: (e) => this.setState(s => ({ form: { ...s.form, jornada: e.target.value } })),
+      setTurno: (e) => this.applyPreset(e.target.value, 0),
+      setPreset: (e) => this.applyPreset(st.form.turno, Number(e.target.value)),
+      presetOptions: (this.shiftPresets()[st.form.turno] || []).map((p, i) => ({ value: String(i), label: p.label })),
+      formHasSaturday: st.form.turno !== 'integral',
+      setJornadaInicio: (e) => this.setState(s => ({ form: { ...s.form, jornadaInicio: e.target.value } })),
+      setJornadaFim: (e) => this.setState(s => ({ form: { ...s.form, jornadaFim: e.target.value } })),
+      setSabInicio: (e) => this.setState(s => ({ form: { ...s.form, sabInicio: e.target.value } })),
+      setSabFim: (e) => this.setState(s => ({ form: { ...s.form, sabFim: e.target.value } })),
+      setNewType: (e) => this.setState(s => ({ form: { ...s.form, newType: e.target.value } })),
+      setNewStart: (e) => this.setState(s => ({ form: { ...s.form, newStart: e.target.value } })),
+      addBreak: () => this.addFormBreak(),
+      addBreakDisabled: !canAddBreak,
+      addBreakStyle: canAddBreak
+        ? { padding: '10px 14px', borderRadius: '10px', border: 'none', background: '#4f8ef7', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }
+        : { padding: '10px 14px', borderRadius: '10px', border: '1px solid #23272e', background: '#0e0f12', color: '#4a505a', fontSize: '13px', fontWeight: 600, cursor: 'not-allowed', whiteSpace: 'nowrap' },
+      hasFormBreaks: st.form.breaks.length > 0,
+      formBreaks: st.form.breaks.map((b, i) => {
+        const c = b.type === '60' ? '#60a5fa' : (b.type === '30' ? '#a78bfa' : '#f5c542');
+        return {
+          label: b.label, start: b.start, end: b.end,
+          tagStyle: { display: 'inline-flex', alignItems: 'center', flex: '0 0 auto', padding: '3px 9px', borderRadius: '6px', fontSize: '11.5px', fontWeight: 700, background: c + '22', color: c, border: '1px solid ' + c + '55' },
+          onRemove: () => this.removeFormBreak(i),
+        };
+      }),
       saveCadastro: () => this.saveCadastro(),
       saveDisabled: fdis,
       saveBtnStyle: fdis
@@ -810,11 +1215,11 @@ class Component extends DCLogic {
 
       // confirmação de pausa (dialog)
       confirmOpen: !!st.confirm,
-      confirmTitle: st.confirm ? (st.confirm.action === 'start' ? 'Iniciar pausa' : 'Finalizar pausa') : '',
+      confirmTitle: st.confirm ? (st.confirm.action === 'start' ? ('Iniciar ' + (st.confirm.label || 'pausa')) : ('Finalizar ' + (st.confirm.label || 'pausa'))) : '',
       confirmMsg: st.confirm
         ? (st.confirm.action === 'start'
-            ? 'Deseja iniciar a pausa de ' + st.confirm.name + '?'
-            : 'Deseja finalizar a pausa de ' + st.confirm.name + '? O funcionário voltará a trabalhar.')
+            ? 'Iniciar ' + (st.confirm.label || 'pausa') + ' de ' + st.confirm.name + ' agora?'
+            : 'Finalizar a ' + (st.confirm.label || 'pausa') + ' de ' + st.confirm.name + '? Ele voltará a trabalhar.')
         : '',
       confirmBtnLabel: st.confirm ? (st.confirm.action === 'start' ? 'Iniciar pausa' : 'Finalizar pausa') : '',
       confirmBtnStyle: (st.confirm && st.confirm.action === 'finish')
@@ -838,13 +1243,6 @@ class Component extends DCLogic {
     };
   }
 
-  maskCpf(v) {
-    v = v.replace(/\D/g, '').slice(0, 11);
-    if (v.length > 9) return v.slice(0,3)+'.'+v.slice(3,6)+'.'+v.slice(6,9)+'-'+v.slice(9);
-    if (v.length > 6) return v.slice(0,3)+'.'+v.slice(3,6)+'.'+v.slice(6);
-    if (v.length > 3) return v.slice(0,3)+'.'+v.slice(3);
-    return v;
-  }
   tagStyle(c) { return { display: 'inline-flex', padding: '3px 9px', borderRadius: '6px', fontSize: '11.5px', fontWeight: 600, background: c + '1f', color: c, border: '1px solid ' + c + '3a' }; }
 }
 </script>

@@ -11,4 +11,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   minimize: () => ipcRenderer.send('win-minimize'),
   maximize: () => ipcRenderer.send('win-maximize'),
   close: () => ipcRenderer.send('win-close'),
+
+  // Importar/exportar a escala em Excel (.xlsx) via diálogos nativos.
+  importExcel: () => ipcRenderer.invoke('import-excel'),
+  exportExcel: (payload) => ipcRenderer.invoke('export-excel', payload),
+  downloadTemplate: () => ipcRenderer.invoke('download-template'),
+
+  // Abre link/email no app padrão do sistema (tela de créditos).
+  openExternal: (url) => ipcRenderer.send('open-external', url),
+
+  // Licenciamento offline.
+  licenseStatus: () => ipcRenderer.invoke('license:status'),
+  licenseMachineId: () => ipcRenderer.invoke('license:machineId'),
+  licenseActivate: (code) => ipcRenderer.invoke('license:activate', code),
 });

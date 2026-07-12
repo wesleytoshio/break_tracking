@@ -3,8 +3,93 @@
 // - Notificações NATIVAS do Windows (Notification -> ToastNotification)
 // - Roda em segundo plano na bandeja do sistema (igual Discord/Steam):
 //   fechar a janela apenas a esconde; o app continua vivo e notificando.
-const { app, BrowserWindow, ipcMain, Notification, shell, Menu, Tray, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, Notification, shell, Menu, Tray, nativeImage, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
+const XLSX = require('xlsx');
+
+// ---- Licenciamento offline (assinatura Ed25519 + trava por máquina) ----
+// Chave PÚBLICA embutida. A privada fica só com o fornecedor (tools/), fora do git.
+const LICENSE_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEA+ivY75lF3rZLDQQhbPRyClzzkSStcfBvgvyxqwSIn58=
+-----END PUBLIC KEY-----`;
+const TRIAL_DAYS = 15;
+
+function licenseFilePath() { return path.join(app.getPath('userData'), 'license.key'); }
+
+// ID único da máquina (Windows MachineGuid; fallback: UUID persistido).
+function getMachineId() {
+  try {
+    if (process.platform === 'win32') {
+      const out = require('child_process').execSync(
+        'reg query "HKLM\\SOFTWARE\\Microsoft\\Cryptography" /v MachineGuid',
+        { encoding: 'utf8', windowsHide: true });
+      const m = /MachineGuid\s+REG_SZ\s+([\w-]+)/i.exec(out);
+      if (m) return m[1].toLowerCase();
+    }
+  } catch (e) { /* fallback abaixo */ }
+  try {
+    const p = path.join(app.getPath('userData'), 'mid.txt');
+    if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8').trim();
+    const id = crypto.randomUUID();
+    fs.writeFileSync(p, id);
+    return id;
+  } catch (e) { return 'unknown'; }
+}
+
+// Verifica a assinatura da licença com a chave pública. Retorna o payload ou null.
+function verifySignedLicense(licStr) {
+  try {
+    const parts = String(licStr).trim().split('.');
+    if (parts.length !== 2) return null;
+    const ok = crypto.verify(null, Buffer.from(parts[0]), LICENSE_PUBLIC_KEY, Buffer.from(parts[1], 'base64url'));
+    if (!ok) return null;
+    return JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8'));
+  } catch (e) { return null; }
+}
+
+// Retorna null se a licença é válida para esta máquina, ou uma mensagem de erro.
+function licenseProblem(payload, machineId) {
+  if (!payload) return 'Licença inválida (assinatura não confere).';
+  if (payload.machineId && payload.machineId.toLowerCase() !== machineId.toLowerCase()) return 'Licença emitida para outra máquina.';
+  if (payload.exp && Date.now() > payload.exp) return 'Licença expirada.';
+  return null;
+}
+
+// Data do primeiro uso (para o período de avaliação). Cria se não existir.
+function getFirstRun() {
+  const p = path.join(app.getPath('userData'), '.firstrun');
+  try {
+    if (fs.existsSync(p)) { const v = parseInt(fs.readFileSync(p, 'utf8').trim(), 10); if (v > 0) return v; }
+  } catch (e) { /* recria */ }
+  const now = Date.now();
+  try { fs.writeFileSync(p, String(now)); } catch (e) { /* ignore */ }
+  return now;
+}
+
+function licenseStatus() {
+  const machineId = getMachineId();
+  let payload = null;
+  try { payload = verifySignedLicense(fs.readFileSync(licenseFilePath(), 'utf8')); } catch (e) { /* sem licença */ }
+  if (payload && !licenseProblem(payload, machineId)) {
+    return { licensed: true, name: payload.name || '', edition: payload.edition || 'pro', exp: payload.exp || null, machineId };
+  }
+  const usedDays = Math.floor((Date.now() - getFirstRun()) / 86400000);
+  return { licensed: false, trialDaysLeft: Math.max(0, TRIAL_DAYS - usedDays), machineId };
+}
+
+ipcMain.handle('license:status', () => licenseStatus());
+ipcMain.handle('license:machineId', () => getMachineId());
+ipcMain.handle('license:activate', (_event, code) => {
+  const machineId = getMachineId();
+  const payload = verifySignedLicense(code);
+  const err = licenseProblem(payload, machineId);
+  if (err) return { ok: false, error: err };
+  try { fs.writeFileSync(licenseFilePath(), String(code).trim()); }
+  catch (e) { return { ok: false, error: 'Não foi possível salvar a licença.' }; }
+  return { ok: true, status: licenseStatus() };
+});
 
 // AppUserModelID: OBRIGATÓRIO no Windows para que as notificações nativas
 // sejam exibidas com o nome/ícone corretos. Definir antes de criar a janela.
@@ -118,6 +203,141 @@ ipcMain.on('notify', (_event, payload) => {
   showNativeNotification(title, body);
 });
 
+// ---- Importação / Exportação de escala em Excel (.xlsx) ----
+// Converte fração de dia do Excel (0.375) em "HH:MM".
+function fracToHHMM(v) {
+  if (typeof v !== 'number' || isNaN(v)) return null;
+  const frac = v - Math.floor(v);
+  const mins = Math.round(frac * 24 * 60);
+  const h = Math.floor(mins / 60) % 24, m = mins % 60;
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+}
+// Import format the app accepts (row 1 = header, one operator per row):
+//  A OPERADOR | B TURNO | C ENTRADA | D SAIDA | E SABADO ENTRADA | F SABADO SAIDA
+//  G PAUSA 10 | H PAUSA 30 | I PAUSA 60 | J PAUSA 10 (2a)
+// TURNO: integral | manha | tarde. Times as HH:MM (or Excel time). Blank = "-".
+const IMPORT_HEADERS = ['OPERADOR', 'TURNO', 'ENTRADA', 'SAIDA', 'SABADO ENTRADA', 'SABADO SAIDA', 'PAUSA 10', 'PAUSA 30', 'PAUSA 60', 'PAUSA 10 (2a)'];
+
+function normalizeTurno(raw) {
+  const c = String(raw || '').trim().toUpperCase().charAt(0);
+  return c === 'I' ? 'integral' : (c === 'T' ? 'tarde' : 'manha');
+}
+function parseSchedule(ws) {
+  const merges = ws['!merges'] || [];
+  const mergeMap = {};
+  for (const m of merges) {
+    const anchor = XLSX.utils.encode_cell(m.s);
+    for (let r = m.s.r; r <= m.e.r; r++)
+      for (let c = m.s.c; c <= m.e.c; c++)
+        mergeMap[XLSX.utils.encode_cell({ r, c })] = anchor;
+  }
+  const getCell = (r, c) => {
+    const ref = XLSX.utils.encode_cell({ r, c });
+    let cl = ws[ref];
+    if ((!cl || cl.v == null) && mergeMap[ref]) cl = ws[mergeMap[ref]];
+    return cl;
+  };
+  const str = (r, c) => { const cl = getCell(r, c); return cl && cl.v != null ? String(cl.v).trim() : ''; };
+  const tm = (r, c) => {
+    const cl = getCell(r, c);
+    if (!cl || cl.v == null) return null;
+    if (typeof cl.v === 'number') return fracToHHMM(cl.v);
+    const s = String(cl.v).trim();
+    return /^\d{1,2}:\d{2}/.test(s) ? s.slice(0, 5).padStart(5, '0') : null;
+  };
+  const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+  const startRow = str(0, 0).toUpperCase().indexOf('OPERADOR') === 0 ? 1 : 0;
+  const rows = [];
+  for (let r = startRow; r <= range.e.r; r++) {
+    const name = str(r, 0);
+    if (!name || name === '-') continue;
+    rows.push({
+      operador: name, turno: normalizeTurno(str(r, 1)),
+      entrada: tm(r, 2), saida: tm(r, 3), sabEntrada: tm(r, 4), sabSaida: tm(r, 5),
+      p10a: tm(r, 6), p30: tm(r, 7), p60: tm(r, 8), p10b: tm(r, 9),
+    });
+  }
+  return rows;
+}
+function rowToArray(r) {
+  return [r.operador, r.turno, r.entrada || '-', r.saida || '-', r.sabEntrada || '-', r.sabSaida || '-', r.p10a || '-', r.p30 || '-', r.p60 || '-', r.p10b || '-'];
+}
+function buildSheet(rows) {
+  const aoa = [IMPORT_HEADERS.slice()];
+  for (const r of rows) aoa.push(rowToArray(r));
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{ wch: 16 }, { wch: 10 }, { wch: 9 }, { wch: 9 }, { wch: 15 }, { wch: 14 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 13 }];
+  return ws;
+}
+// Example template: header + one sample row per shift kind.
+function buildTemplate() {
+  return buildSheet([
+    { operador: 'MARIA (integral)', turno: 'integral', entrada: '08:00', saida: '17:02', sabEntrada: '-', sabSaida: '-', p10a: '10:00', p30: '-', p60: '12:00', p10b: '15:00' },
+    { operador: 'JOAO (manha eq.1)', turno: 'manha', entrada: '08:00', saida: '14:20', sabEntrada: '08:00', sabSaida: '14:20', p10a: '10:00', p30: '12:00', p60: '-', p10b: '-' },
+    { operador: 'ANA (manha eq.3)', turno: 'manha', entrada: '10:00', saida: '16:20', sabEntrada: '09:00', sabSaida: '15:20', p10a: '12:00', p30: '14:00', p60: '-', p10b: '-' },
+    { operador: 'PEDRO (tarde)', turno: 'tarde', entrada: '14:20', saida: '20:40', sabEntrada: '08:00', sabSaida: '14:20', p10a: '16:20', p30: '18:30', p60: '-', p10b: '-' },
+    { operador: 'LUCAS (tarde)', turno: 'tarde', entrada: '14:20', saida: '20:40', sabEntrada: '09:00', sabSaida: '15:20', p10a: '16:20', p30: '18:30', p60: '-', p10b: '-' },
+  ]);
+}
+
+ipcMain.handle('import-excel', async () => {
+  const res = await dialog.showOpenDialog(mainWindow, {
+    title: 'Importar escala de pausas',
+    properties: ['openFile'],
+    filters: [{ name: 'Planilha Excel', extensions: ['xlsx', 'xls'] }],
+  });
+  if (res.canceled || !res.filePaths.length) return null;
+  try {
+    const wb = XLSX.readFile(res.filePaths[0], { cellNF: false, cellText: false });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = parseSchedule(ws);
+    return { fileName: path.basename(res.filePaths[0]), rows };
+  } catch (e) {
+    return { error: e.message };
+  }
+});
+
+ipcMain.handle('export-excel', async (_event, payload) => {
+  const rows = (payload && payload.rows) || [];
+  const res = await dialog.showSaveDialog(mainWindow, {
+    title: 'Exportar escala de pausas',
+    defaultPath: 'escala_pausas.xlsx',
+    filters: [{ name: 'Planilha Excel', extensions: ['xlsx'] }],
+  });
+  if (res.canceled || !res.filePath) return { ok: false };
+  try {
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, buildSheet(rows), 'Escala');
+    XLSX.writeFile(wb, res.filePath);
+    return { ok: true, path: res.filePath };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
+// Saves the example import template so users can adapt it.
+ipcMain.handle('download-template', async () => {
+  const res = await dialog.showSaveDialog(mainWindow, {
+    title: 'Salvar modelo de importação',
+    defaultPath: 'modelo_importacao.xlsx',
+    filters: [{ name: 'Planilha Excel', extensions: ['xlsx'] }],
+  });
+  if (res.canceled || !res.filePath) return { ok: false };
+  try {
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, buildTemplate(), 'Modelo');
+    XLSX.writeFile(wb, res.filePath);
+    return { ok: true, path: res.filePath };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
+// Abre links externos / email no app padrão do sistema (usado nos créditos).
+ipcMain.on('open-external', (_event, url) => {
+  if (typeof url === 'string' && /^(https?:|mailto:)/i.test(url)) shell.openExternal(url);
+});
+
 // Controles da janela (barra de título customizada) acionados pelos 3 botões.
 ipcMain.on('win-minimize', () => { if (mainWindow) mainWindow.minimize(); });
 ipcMain.on('win-maximize', () => {
@@ -137,6 +357,7 @@ if (!gotLock) {
 
   app.whenReady().then(() => {
     Menu.setApplicationMenu(null);
+    getFirstRun(); // marca o início do período de avaliação já na 1ª execução
     createWindow();
     createTray();
 

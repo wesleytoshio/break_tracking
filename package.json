@@ -10,7 +10,8 @@
     "dist": "electron-builder --win"
   },
   "devDependencies": {
-    "electron": "^33.4.11"
+    "electron": "^33.4.11",
+    "electron-builder": "^26.15.3"
   },
   "build": {
     "appId": "com.controledepausas.desktop",
@@ -33,5 +34,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     }
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
   }
 }

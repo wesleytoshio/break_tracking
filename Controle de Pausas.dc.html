@@ -642,30 +642,59 @@ class Component extends DCLogic {
     setTimeout(() => this.setState({ loading: false }), 950);
     // Habilita o cadastro livre (teste) se a env PAUSA_TEST_MODE estiver setada.
     if (window.electronAPI && window.electronAPI.freeTestMode) this.setState({ freeTest: true });
+    this._notified = new Set();   // notificações já disparadas hoje (dedup por dia)
+    this._endedToday = new Set();  // pausas agendadas encerradas cedo hoje (chave dia|id|start)
     this._timer = setInterval(() => {
       const now = Date.now();
-      const expired = [];
+      const d = new Date(now);
+      const curMin = d.getHours() * 60 + d.getMinutes();
+      const dayStr = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+      if (this._notifiedDay !== dayStr) { this._notifiedDay = dayStr; this._notified = new Set(); this._endedToday = new Set(); }
+      // O STATUS é derivado do relógio em computeStatus() — a lista já fica correta
+      // sozinha. Aqui só disparamos NOTIFICAÇÕES, e só na virada do minuto (evita
+      // repetir e evita "avisar" pausas que já passaram quando o app abre).
+      const minuteChanged = this._prevMin != null && curMin !== this._prevMin;
+
+      const notifs = [];
       let changed = false;
       const employees = [];
       for (const e of this.state.employees) {
-        if (e.status === 'pause' && e.pauseEndsAt <= now) {
-          expired.push({ name: e.name, isTest: !!e.isTest });
+        // Fim de pausa MANUAL/teste (a agendada é derivada, não precisa mutar estado).
+        if (e.status === 'pause' && e.pauseEndsAt && e.pauseEndsAt <= now) {
+          notifs.push({ kind: 'end', name: e.name, isTest: !!e.isTest });
           changed = true;
-          // Operador de teste some da lista quando a pausa acaba; os reais voltam a trabalhar.
           if (e.isTest) continue;
           employees.push({ ...e, status: 'working', pauseType: null, pauseLabel: null, pauseEndsAt: null, pauseTotal: null });
-        } else {
-          employees.push(e);
+          continue;
+        }
+        employees.push(e);
+        // Notifica início/fim das pausas AGENDADAS (sem mutar status — é derivado).
+        if (minuteChanged && !e.isTest && e.breaks && e.breaks.length && this.isOnShift(e)) {
+          for (const b of e.breaks) {
+            const sm = this.hhmmToMin(b.start), em = this.hhmmToMin(b.end);
+            const bkey = dayStr + '|' + e.id + '|' + b.start;
+            if (this._endedToday.has(bkey)) continue; // encerrada cedo: não notifica
+            if (sm > this._prevMin && sm <= curMin && !this._notified.has('s|' + bkey)) {
+              this._notified.add('s|' + bkey);
+              notifs.push({ kind: 'bstart', name: e.name, label: b.label, start: b.start, mins: b.mins });
+            }
+            if (em > this._prevMin && em <= curMin && !this._notified.has('e|' + bkey)) {
+              this._notified.add('e|' + bkey);
+              notifs.push({ kind: 'bend', name: e.name });
+            }
+          }
         }
       }
-      if (changed) {
-        this.setState({ employees, now });
-        expired.forEach(x => x.isTest
-          ? this.toast('ok', 'Teste concluído', x.name + ' — notificação disparada no horário')
-          : this.toast('ok', 'Pausa concluída', x.name + ' voltou a trabalhar'));
-      } else {
-        this.setState({ now });
-      }
+      if (this._prevMin == null || minuteChanged) this._prevMin = curMin;
+
+      if (changed) this.setState({ employees, now });
+      else this.setState({ now });
+
+      notifs.forEach(n => {
+        if (n.kind === 'end') this.toast('ok', n.isTest ? 'Teste concluído' : 'Pausa concluída', n.isTest ? (n.name + ' — notificação disparada no horário') : (n.name + ' voltou a trabalhar'));
+        else if (n.kind === 'bstart') this.toast('warn', (n.label || 'Pausa') + ' — ' + n.name, 'Início às ' + n.start + ' · ' + n.mins + ' min');
+        else this.toast('ok', 'Pausa concluída', n.name + ' voltou a trabalhar');
+      });
     }, 1000);
   }
   componentWillUnmount() { clearInterval(this._timer); }
@@ -801,11 +830,35 @@ class Component extends DCLogic {
     if (!schedule) return false;
     return nm >= this.hhmmToMin(schedule.inicio) && nm < this.hhmmToMin(schedule.fim);
   }
-  // Current status: 'off' (out of shift) wins; else manual 'pause'; else 'working'.
+  _dayKey(ms) { const d = new Date(ms); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  // Pausa AGENDADA ativa agora, derivada da escala + relógio (ou null). O retorno
+  // é o fim da pausa (início + duração) de hoje. Respeita encerramento antecipado.
+  scheduledBreakNow(e) {
+    if (e.isTest || !e.breaks || !e.breaks.length || !this.isOnShift(e)) return null;
+    const nm = this.nowMin();
+    const dayStr = this._dayKey(this.state.now);
+    for (const b of e.breaks) {
+      const sm = this.hhmmToMin(b.start), em = this.hhmmToMin(b.end);
+      if (nm >= sm && nm < em && !(this._endedToday && this._endedToday.has(dayStr + '|' + e.id + '|' + b.start))) {
+        const d = new Date(this.state.now); d.setHours(Math.floor(em / 60), em % 60, 0, 0);
+        return { label: b.label, type: b.type, mins: b.mins, start: b.start, endsAt: d.getTime() };
+      }
+    }
+    return null;
+  }
+  // Pausa ativa agora: manual/teste (status gravado) OU agendada (derivada do relógio).
+  activeBreak(e) {
+    if (e.status === 'pause' && e.pauseEndsAt && e.pauseEndsAt > this.state.now) {
+      return { label: e.pauseLabel, type: e.pauseType, mins: Math.round((e.pauseTotal || 0) / 60), endsAt: e.pauseEndsAt, manual: true };
+    }
+    return this.scheduledBreakNow(e);
+  }
+  // Status atual DERIVADO DO RELÓGIO: 'off' (fora da jornada) vence; senão em pausa
+  // (agendada pelo horário OU manual); senão 'working'.
   computeStatus(e) {
-    if (e.isTest) return e.status === 'pause' ? 'pause' : 'working'; // teste ignora jornada
+    if (e.isTest) return this.activeBreak(e) ? 'pause' : 'working';
     if (!this.isOnShift(e)) return 'off';
-    return e.status === 'pause' ? 'pause' : 'working';
+    return this.activeBreak(e) ? 'pause' : 'working';
   }
   // Sábado (Date) da semana de uma data em ms.
   saturdayOfWeek(dateMs) { const x = new Date(dateMs); x.setDate(x.getDate() + (6 - x.getDay())); x.setHours(0, 0, 0, 0); return x; }
@@ -872,8 +925,16 @@ class Component extends DCLogic {
   }
   finishPause(id) {
     const emp = this.state.employees.find(e => e.id === id);
+    if (!emp) return;
+    // Pausa AGENDADA (derivada): marca encerramento antecipado de hoje. Manual: limpa
+    // o status gravado. Em ambos, o operador volta a "Trabalhando".
+    const sched = this.scheduledBreakNow(emp);
+    if (sched) {
+      if (!this._endedToday) this._endedToday = new Set();
+      this._endedToday.add(this._dayKey(this.state.now) + '|' + emp.id + '|' + sched.start);
+    }
     this.setState(s => ({ employees: s.employees.map(e => e.id === id ? { ...e, status: 'working', pauseType: null, pauseLabel: null, pauseEndsAt: null, pauseTotal: null } : e) }));
-    if (emp) this.toast('ok', 'Pausa concluída', emp.name + ' voltou a trabalhar');
+    this.toast('ok', 'Pausa concluída', emp.name + ' voltou a trabalhar');
   }
 
   // ---- Importar / Exportar Excel (real, via processo principal) ----
@@ -1055,7 +1116,7 @@ class Component extends DCLogic {
     const working = emps.filter(e => statusOf(e) === 'working').length;
     const onPause = emps.filter(e => statusOf(e) === 'pause').length;
     const offShift = emps.filter(e => statusOf(e) === 'off').length;
-    const pauseSecs = emps.filter(e => statusOf(e) === 'pause').map(e => Math.max(0, Math.round((e.pauseEndsAt - now) / 1000)));
+    const pauseSecs = emps.filter(e => statusOf(e) === 'pause').map(e => { const ab = this.activeBreak(e); return ab ? Math.max(0, Math.round((ab.endsAt - now) / 1000)) : 0; });
     const avg = pauseSecs.length ? Math.round(pauseSecs.reduce((a, b) => a + b, 0) / pauseSecs.length) : 0;
 
     // List rows — filtered by the current screen's computed status.
@@ -1078,9 +1139,10 @@ class Component extends DCLogic {
       const status = statusOf(e); // 'working' | 'pause' | 'off'
       const isPause = status === 'pause';
       const isOff = status === 'off';
-      const rem = isPause ? Math.max(0, Math.round((e.pauseEndsAt - now) / 1000)) : 0;
+      const ab = this.activeBreak(e);
+      const rem = isPause && ab ? Math.max(0, Math.round((ab.endsAt - now) / 1000)) : 0;
       const nb = this.nextBreak(e);
-      const cc = isPause ? catColor(e.pauseType) : (isOff ? '#8a919b' : '#2fbf71');
+      const cc = isPause ? catColor(ab ? ab.type : e.pauseType) : (isOff ? '#8a919b' : '#2fbf71');
       const btn = { width: '100%', padding: '9px 13px', borderRadius: '9px', fontSize: '13px', fontWeight: 600 };
       let actionLabel, actionStyle, onAction, actionDisabled = false;
       let statusLabel, statusStyle, metaLabel, metaValue, timerColor;
@@ -1092,8 +1154,8 @@ class Component extends DCLogic {
       } else if (isPause) {
         actionLabel = 'Finalizar pausa'; onAction = () => this.askConfirm(e.id, 'finish');
         actionStyle = { ...btn, border: 'none', background: '#f5c542', color: '#1a1400', cursor: 'pointer' };
-        statusLabel = e.pauseLabel || 'Em pausa'; statusStyle = catBadge(cc);
-        metaLabel = 'EM ' + (e.pauseLabel || 'PAUSA').toUpperCase(); metaValue = this.fmt(rem); timerColor = rem < 60 ? '#ef4444' : cc;
+        statusLabel = (ab && ab.label) || 'Em pausa'; statusStyle = catBadge(cc);
+        metaLabel = 'EM ' + ((ab && ab.label) || 'PAUSA').toUpperCase(); metaValue = this.fmt(rem); timerColor = rem < 60 ? '#ef4444' : cc;
       } else {
         actionLabel = 'Iniciar pausa'; onAction = () => this.askConfirm(e.id, 'start');
         actionStyle = { ...btn, border: '1px solid #2a5aa8', background: 'rgba(79,142,247,.14)', color: '#6aa8ff', cursor: 'pointer' };

@@ -20,6 +20,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Abre link/email no app padrão do sistema (tela de créditos).
   openExternal: (url) => ipcRenderer.send('open-external', url),
 
+  // Modo de teste livre (só validar notificações) — habilitado por env var no
+  // processo principal, repassado via additionalArguments.
+  freeTestMode: process.argv.includes('--pausa-test-mode'),
+
   // Licenciamento offline.
   licenseStatus: () => ipcRenderer.invoke('license:status'),
   licenseMachineId: () => ipcRenderer.invoke('license:machineId'),

@@ -16,6 +16,12 @@ MCowBQYDK2VwAyEA+ivY75lF3rZLDQQhbPRyClzzkSStcfBvgvyxqwSIn58=
 -----END PUBLIC KEY-----`;
 const TRIAL_DAYS = 15;
 
+// Modo de teste livre (apenas para validar as notificações): habilitado por
+// variável de ambiente. Com PAUSA_TEST_MODE=1 (ou true/on/yes) o app mostra o
+// "Cadastro livre", que dispara uma pausa com duração arbitrária. Sem a env,
+// nada disso aparece — é uma regra só de teste.
+const FREE_TEST_MODE = /^(1|true|on|yes)$/i.test(String(process.env.PAUSA_TEST_MODE || '').trim());
+
 function licenseFilePath() { return path.join(app.getPath('userData'), 'license.key'); }
 
 // ID único da máquina (Windows MachineGuid; fallback: UUID persistido).
@@ -127,6 +133,8 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      // Passa a flag do modo de teste ao preload (sandbox lê via process.argv).
+      additionalArguments: FREE_TEST_MODE ? ['--pausa-test-mode'] : [],
       // Mantém timers/JS rodando em ritmo normal mesmo com a janela
       // escondida/minimizada — essencial para as pausas continuarem
       // sendo contadas e notificadas em segundo plano.

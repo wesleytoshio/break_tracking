@@ -105,6 +105,10 @@ if (process.platform === 'win32') {
 }
 
 const HTML_FILE = 'Controle de Pausas.dc.html';
+// Nova arquitetura (view separada, sem DataCosmos) — em migração. Com PAUSA_NEW_UI=1
+// carrega app/index.html; sem a env, segue o .dc.html atual (não quebra nada).
+const NEW_UI = /^(1|true|on|yes)$/i.test(String(process.env.PAUSA_NEW_UI || '').trim());
+const ENTRY_FILE = NEW_UI ? path.join('app', 'index.html') : HTML_FILE;
 const ICON_ICO = path.join(__dirname, 'assets', 'icon.ico');
 const ICON_PNG = path.join(__dirname, 'assets', 'icon.png');
 
@@ -142,7 +146,7 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, HTML_FILE));
+  mainWindow.loadFile(path.join(__dirname, ENTRY_FILE));
   mainWindow.once('ready-to-show', () => mainWindow.show());
 
   // Fechar a janela NÃO encerra o app: esconde na bandeja (comportamento

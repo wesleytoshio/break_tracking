@@ -224,7 +224,7 @@
           <sc-if value="{{ showRows }}" hint-placeholder-val="{{ false }}">
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)); gap: 14px; padding: 18px;">
             <sc-for list="{{ rows }}" as="row" hint-placeholder-count="6">
-              <div style="{{ row.cardStyle }}" style-hover="border-color: #3a414b;">
+              <div onClick="{{ row.onCard }}" style="{{ row.cardStyle }}" style-hover="border-color: #4f8ef7;">
                 <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 15px;">
                   <div style="{{ row.avatarLg }}">{{ row.initials }}</div>
                   <div style="flex: 1; min-width: 0;">
@@ -235,7 +235,7 @@
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #1c1f25; border: 1px solid #1c1f25; border-radius: 10px; overflow: hidden; margin-bottom: 13px;">
                   <div style="background: #101216; padding: 9px 12px;"><div style="font-size: 10px; font-weight: 700; letter-spacing: .5px; color: #565d67; margin-bottom: 3px;">JORNADA</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #c5c9cf;">{{ row.jornadaText }}</div></div>
-                  <div style="background: #101216; padding: 9px 12px;"><div style="font-size: 10px; font-weight: 700; letter-spacing: .5px; color: #565d67; margin-bottom: 3px;">PAUSAS</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #c5c9cf;">{{ row.pausasText }}</div></div>
+                  <div onClick="{{ row.onPausas }}" style="{{ row.pausasBoxStyle }}" style-hover="background: #14161b;"><div style="font-size: 10px; font-weight: 700; letter-spacing: .5px; color: #565d67; margin-bottom: 3px; white-space: nowrap;">PRÓX. PAUSAS</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #c5c9cf; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.pausasNext }}<sc-if value="{{ row.pausasClickable }}" hint-placeholder-val="{{ false }}"><span style="{{ row.morePillStyle }}">+{{ row.pausasMore }}</span></sc-if></div></div>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
                   <div>
@@ -410,7 +410,7 @@
     <div onClick="{{ closeCadastro }}" style="position: fixed; inset: 0; background: rgba(5,6,8,.68); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 100; animation: cp-fadeIn .16s ease;">
       <div onClick="{{ stop }}" style="width: 460px; max-width: calc(100vw - 40px); background: #16181d; border: 1px solid #262a30; border-radius: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.6); animation: cp-modalIn .22s cubic-bezier(.2,.8,.2,1); overflow: hidden;">
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; border-bottom: 1px solid #23272e;">
-          <div><div style="font-size: 16.5px; font-weight: 700;">Novo operador</div><div style="font-size: 12.5px; color: #6b727c; margin-top: 1px;">Nome, turno e horários de pausa</div></div>
+          <div><div style="font-size: 16.5px; font-weight: 700;">{{ cadastroTitle }}</div><div style="font-size: 12.5px; color: #6b727c; margin-top: 1px;">{{ cadastroSubtitle }}</div></div>
           <button onClick="{{ closeCadastro }}" style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #9aa1ab; cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="border-color:#3a414b; color:#e6e8eb;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         </div>
         <div style="padding: 22px;">
@@ -476,9 +476,16 @@
             </sc-if>
           </div>
         </div>
-        <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 16px 22px; border-top: 1px solid #23272e; background: #121419;">
-          <button onClick="{{ closeCadastro }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13.5px; font-weight: 500; cursor: pointer;" style-hover="border-color:#3a414b;">Cancelar</button>
-          <button onClick="{{ saveCadastro }}" disabled="{{ saveDisabled }}" style="{{ saveBtnStyle }}">Salvar operador</button>
+        <div style="display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 16px 22px; border-top: 1px solid #23272e; background: #121419;">
+          <div>
+            <sc-if value="{{ cadastroIsEdit }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ askDelete }}" style="display: inline-flex; align-items: center; gap: 7px; padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(229,72,77,.35); background: rgba(229,72,77,.08); color: #ff6369; font-size: 13.5px; font-weight: 600; cursor: pointer;" style-hover="background:rgba(229,72,77,.16); border-color:#e5484d;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>Excluir</button>
+            </sc-if>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button onClick="{{ closeCadastro }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13.5px; font-weight: 500; cursor: pointer;" style-hover="border-color:#3a414b;">Cancelar</button>
+            <button onClick="{{ saveCadastro }}" disabled="{{ saveDisabled }}" style="{{ saveBtnStyle }}">{{ saveCadastroLabel }}</button>
+          </div>
         </div>
       </div>
     </div>
@@ -525,6 +532,28 @@
             <button onClick="{{ closeFreeTest }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #23272e; background: #0e0f12; color: #d6d9de; font-size: 13.5px; font-weight: 500; cursor: pointer;" style-hover="border-color:#3a414b;">Fechar</button>
             <button onClick="{{ startFreeTest }}" style="padding: 10px 20px; border-radius: 10px; border: none; background: #f5c542; color: #1a1400; font-size: 13.5px; font-weight: 700; cursor: pointer;" style-hover="background:#f7cf5e;">Iniciar teste</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ MODAL PAUSAS DO DIA ============ -->
+  <sc-if value="{{ breaksModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeBreaksModal }}" style="position: fixed; inset: 0; background: rgba(5,6,8,.68); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 128; animation: cp-fadeIn .16s ease;">
+      <div onClick="{{ stop }}" style="width: 440px; max-width: calc(100vw - 40px); background: #16181d; border: 1px solid #262a30; border-radius: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.6); animation: cp-modalIn .22s cubic-bezier(.2,.8,.2,1); overflow: hidden;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; border-bottom: 1px solid #23272e;">
+          <div><div style="font-size: 16.5px; font-weight: 700;">Pausas do dia</div><div style="font-size: 12.5px; color: #6b727c; margin-top: 1px;">{{ breaksModalName }}</div></div>
+          <button onClick="{{ closeBreaksModal }}" style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid #23272e; background: #0e0f12; color: #9aa1ab; cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="border-color:#3a414b; color:#e6e8eb;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        </div>
+        <div style="padding: 8px 22px 18px; max-height: 380px; overflow-y: auto;">
+          <sc-for list="{{ breaksModalRows }}" as="b" hint-placeholder-count="3">
+            <div style="{{ b.rowStyle }}">
+              <span style="{{ b.tagStyle }}">{{ b.label }}</span>
+              <span style="flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #c5c9cf;">{{ b.timeText }}</span>
+              <span style="font-size: 12px; color: #6b727c;">{{ b.mins }}</span>
+              <span style="{{ b.stateStyle }}">{{ b.stateLabel }}</span>
+            </div>
+          </sc-for>
         </div>
       </div>
     </div>
@@ -619,6 +648,7 @@ class Component extends DCLogic {
     now: Date.now(),
     employees: this.buildEmployees(),
     cadastroOpen: false,
+    breaksModal: null, // { id } — modal "Pausas do dia" (expande a caixa PAUSAS)
     confirm: null, // { id, action: 'start' | 'finish', name, label }
     betaOpen: false, // modal "Versão beta" (ex.: ao clicar em Exportar)
     satInfoOpen: false, // saturday rotation modal
@@ -899,13 +929,14 @@ class Component extends DCLogic {
     if (!emp) return;
     let label = 'pausa';
     if (action === 'start') { const nb = this.nextBreak(emp); label = nb ? nb.label : 'Pausa 10'; }
-    else if (emp.pauseLabel) { label = emp.pauseLabel; }
+    else if (action === 'finish' && emp.pauseLabel) { label = emp.pauseLabel; }
     this.setState({ confirm: { id, action, name: emp.name, label } });
   }
   runConfirm() {
     const c = this.state.confirm;
     if (!c) return;
     if (c.action === 'start') this.startPause(c.id);
+    else if (c.action === 'delete') this.deleteOperator(c.id);
     else this.finishPause(c.id);
     this.setState({ confirm: null });
   }
@@ -1029,14 +1060,30 @@ class Component extends DCLogic {
       breaks: preset.breaks.map(b => this.mkBreak(b.type, b.start)),
     } }));
   }
-  // Open the register modal with a fresh, preset-filled form.
+  // Open the register modal with a fresh, preset-filled form (modo criar).
   openCadastro() {
     const preset = this.shiftPresets().manha[0];
     this.setState({ cadastroOpen: true, form: {
+      editId: null,
       nome: '', turno: 'manha', presetIndex: 0,
       jornadaInicio: preset.jornada.inicio, jornadaFim: preset.jornada.fim,
       sabInicio: preset.jornadaSab.inicio, sabFim: preset.jornadaSab.fim,
       breaks: preset.breaks.map(b => this.mkBreak(b.type, b.start)),
+      newType: '10', newStart: '',
+    } });
+  }
+  // Abre o MESMO modal em modo edição, pré-preenchido com o operador (CRUD ao clicar no card).
+  openEditModal(id) {
+    const e = this.state.employees.find(x => x.id === id);
+    if (!e) return;
+    this.setState({ cadastroOpen: true, form: {
+      editId: e.id,
+      nome: e.name, turno: e.turno, presetIndex: 0,
+      jornadaInicio: e.jornada ? e.jornada.inicio : '08:00',
+      jornadaFim: e.jornada ? e.jornada.fim : '14:20',
+      sabInicio: e.jornadaSab ? e.jornadaSab.inicio : '08:00',
+      sabFim: e.jornadaSab ? e.jornadaSab.fim : '14:20',
+      breaks: (e.breaks || []).map(b => this.mkBreak(b.type, b.start)),
       newType: '10', newStart: '',
     } });
   }
@@ -1055,17 +1102,36 @@ class Component extends DCLogic {
   saveCadastro() {
     const f = this.state.form;
     if (!f.nome.trim()) return;
+    const resetForm = { editId: null, nome: '', turno: 'manha', presetIndex: 0, jornadaInicio: '08:00', jornadaFim: '14:20', sabInicio: '08:00', sabFim: '14:20', breaks: [], newType: '10', newStart: '' };
+    const jornadaSab = f.turno === 'integral' ? null : { inicio: f.sabInicio, fim: f.sabFim };
+    const breaks = f.breaks.map(b => this.mkBreak(b.type, b.start));
+    if (f.editId) {
+      // UPDATE — preserva id, cor e estado de pausa; atualiza os campos editáveis.
+      this.setState(s => ({
+        employees: s.employees.map(e => e.id === f.editId
+          ? { ...e, name: f.nome.trim(), turno: f.turno, jornada: { inicio: f.jornadaInicio, fim: f.jornadaFim }, jornadaSab, breaks }
+          : e),
+        cadastroOpen: false, form: resetForm,
+      }));
+      this.toast('ok', 'Operador atualizado', f.nome.trim() + ' foi salvo');
+      return;
+    }
+    // CREATE
     const palette = ['#4f8ef7','#2fbf71','#f5c542','#a78bfa','#f472b6','#22d3ee','#fb923c','#60a5fa','#34d399','#e879f9'];
     const emp = {
       id: Date.now(), name: f.nome.trim(), turno: f.turno,
-      jornada: { inicio: f.jornadaInicio, fim: f.jornadaFim },
-      jornadaSab: f.turno === 'integral' ? null : { inicio: f.sabInicio, fim: f.sabFim },
-      breaks: f.breaks.map(b => this.mkBreak(b.type, b.start)),
+      jornada: { inicio: f.jornadaInicio, fim: f.jornadaFim }, jornadaSab, breaks,
       status: 'working', color: palette[Math.floor(Math.random() * palette.length)],
       pauseType: null, pauseLabel: null, pauseTotal: null, pauseEndsAt: null,
     };
-    this.setState(s => ({ employees: [emp, ...s.employees], cadastroOpen: false, form: { nome: '', turno: 'manha', presetIndex: 0, jornadaInicio: '08:00', jornadaFim: '14:20', sabInicio: '08:00', sabFim: '14:20', breaks: [], newType: '10', newStart: '' } }));
+    this.setState(s => ({ employees: [emp, ...s.employees], cadastroOpen: false, form: resetForm }));
     this.toast('ok', 'Operador cadastrado', f.nome.trim() + ' foi adicionado');
+  }
+  // DELETE — remove o operador (confirmado pelo dialog). Fecha o modal de edição.
+  deleteOperator(id) {
+    const emp = this.state.employees.find(e => e.id === id);
+    this.setState(s => ({ employees: s.employees.filter(e => e.id !== id), cadastroOpen: false, form: { editId: null, nome: '', turno: 'manha', presetIndex: 0, jornadaInicio: '08:00', jornadaFim: '14:20', sabInicio: '08:00', sabFim: '14:20', breaks: [], newType: '10', newStart: '' } }));
+    if (emp) this.toast('ok', 'Operador removido', emp.name + ' foi excluído');
   }
 
   // ---- Cadastro livre (teste de notificação) — só com a env PAUSA_TEST_MODE ----
@@ -1097,6 +1163,9 @@ class Component extends DCLogic {
     this.setState(s => ({ employees: [emp, ...s.employees], screen: 'pausa', freeForm: { ...s.freeForm, targetTime: this.hhmmss(Date.now() + 20000) } }));
     this.toast('warn', 'Teste agendado', emp.name + ' — dispara às ' + this.hhmmss(target));
   }
+
+  // Abre o modal "Pausas do dia" de um operador (expande a caixa PRÓX. PAUSAS).
+  openBreaksModal(id) { this.setState({ breaksModal: { id } }); }
 
   chip(active) {
     const base = { padding: '7px 13px', borderRadius: '8px', fontSize: '12.5px', fontWeight: 600, cursor: 'pointer', border: '1px solid ', transition: 'all .12s' };
@@ -1152,28 +1221,40 @@ class Component extends DCLogic {
         statusLabel = 'Fora'; statusStyle = offBadge;
         metaLabel = 'PRÓXIMA ENTRADA'; metaValue = e.jornada ? e.jornada.inicio : '—'; timerColor = '#8a919b';
       } else if (isPause) {
-        actionLabel = 'Finalizar pausa'; onAction = () => this.askConfirm(e.id, 'finish');
+        actionLabel = 'Finalizar pausa'; onAction = (ev) => { if (ev && ev.stopPropagation) ev.stopPropagation(); this.askConfirm(e.id, 'finish'); };
         actionStyle = { ...btn, border: 'none', background: '#f5c542', color: '#1a1400', cursor: 'pointer' };
         statusLabel = (ab && ab.label) || 'Em pausa'; statusStyle = catBadge(cc);
         metaLabel = 'EM ' + ((ab && ab.label) || 'PAUSA').toUpperCase(); metaValue = this.fmt(rem); timerColor = rem < 60 ? '#ef4444' : cc;
       } else {
-        actionLabel = 'Iniciar pausa'; onAction = () => this.askConfirm(e.id, 'start');
+        actionLabel = 'Iniciar pausa'; onAction = (ev) => { if (ev && ev.stopPropagation) ev.stopPropagation(); this.askConfirm(e.id, 'start'); };
         actionStyle = { ...btn, border: '1px solid #2a5aa8', background: 'rgba(79,142,247,.14)', color: '#6aa8ff', cursor: 'pointer' };
         statusLabel = 'Trabalhando'; statusStyle = workBadge;
         metaLabel = nb ? ('PRÓXIMA · ' + nb.label.toUpperCase()) : 'SEM PAUSAS'; metaValue = nb ? (nb.start + ' → ' + nb.end) : '—'; timerColor = '#c5c9cf';
       }
       const info = this.turnoInfo(e.turno);
       const jornadaText = e.jornada ? (e.jornada.inicio + '–' + e.jornada.fim) : '—';
-      const pausasText = e.breaks.length ? e.breaks.map(b => b.start).join(' · ') : '—';
+      // Próximas pausas do dia (as que ainda não terminaram); as passadas ficam ocultas.
+      const nmNow = this.nowMin();
+      const upcoming = (e.breaks || []).filter(b => this.hhmmToMin(b.end) > nmNow).sort((a, b) => this.hhmmToMin(a.start) - this.hhmmToMin(b.start));
+      const pausasNext = upcoming.length ? upcoming[0].start : '—';
+      const pausasMore = Math.max(0, upcoming.length - 1);
+      const pausasClickable = upcoming.length >= 2;
       const cardBorder = isPause ? '#3a3110' : '#1c1f25';
       return {
         id: e.id, name: e.name,
         turnoLabel: info.label,
         turnoChipStyle: { display: 'inline-flex', alignItems: 'center', marginTop: '3px', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, background: info.color + '1f', color: info.color, border: '1px solid ' + info.color + '44' },
-        jornadaText, pausasText,
+        jornadaText,
+        pausasNext, pausasMore, pausasClickable,
+        onPausas: pausasClickable ? (ev) => { if (ev && ev.stopPropagation) ev.stopPropagation(); this.openBreaksModal(e.id); } : () => {},
+        pausasBoxStyle: pausasClickable
+          ? { background: '#101216', padding: '9px 12px', cursor: 'pointer' }
+          : { background: '#101216', padding: '9px 12px' },
+        morePillStyle: { display: 'inline-flex', alignItems: 'center', marginLeft: '6px', padding: '0 6px', height: '16px', borderRadius: '5px', fontSize: '10px', fontWeight: 700, background: 'rgba(79,142,247,.16)', color: '#6aa8ff', border: '1px solid rgba(79,142,247,.3)', verticalAlign: 'middle' },
         initials: this.initials(e.name), avatarStyle: this.avatarStyle(e.color), avatarLg: this.avatarStyle(e.color, 42),
         isPause,
-        cardStyle: { background: '#101216', border: '1px solid ' + cardBorder, borderRadius: '14px', padding: '16px', transition: 'border-color .12s' },
+        cardStyle: { background: '#101216', border: '1px solid ' + cardBorder, borderRadius: '14px', padding: '16px', transition: 'border-color .12s', cursor: 'pointer' },
+        onCard: () => this.openEditModal(e.id),
         statusLabel, statusStyle,
         dotStyle: dot(cc),
         metaLabel, metaValue, timerColor,
@@ -1352,8 +1433,37 @@ class Component extends DCLogic {
       startFreeTest: () => this.startFreeTest(),
       freeTestBtnStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: collapsed ? '0' : '8px', padding: '10px', borderRadius: '10px', border: '1px solid rgba(245,197,66,.35)', background: 'rgba(245,197,66,.08)', color: '#f5c542', fontSize: '13px', fontWeight: 600, cursor: 'pointer' },
 
-      // cadastro
+      // modal "Pausas do dia" (expande a caixa PRÓX. PAUSAS quando há +1)
+      breaksModalOpen: !!st.breaksModal,
+      breaksModalName: (() => { if (!st.breaksModal) return ''; const e = emps.find(x => x.id === st.breaksModal.id); return e ? e.name : ''; })(),
+      breaksModalRows: (() => {
+        if (!st.breaksModal) return [];
+        const e = emps.find(x => x.id === st.breaksModal.id);
+        if (!e || !e.breaks) return [];
+        const nm = this.nowMin();
+        return e.breaks.slice().sort((a, b) => this.hhmmToMin(a.start) - this.hhmmToMin(b.start)).map(b => {
+          const sm = this.hhmmToMin(b.start), em = this.hhmmToMin(b.end);
+          const kind = em <= nm ? 'past' : (nm >= sm ? 'current' : 'next');
+          const c = b.type === '60' ? '#60a5fa' : (b.type === '30' ? '#a78bfa' : '#f5c542');
+          const stateLabel = kind === 'past' ? 'Passou' : (kind === 'current' ? 'Agora' : 'A seguir');
+          const stateColor = kind === 'past' ? '#6b727c' : (kind === 'current' ? '#f5c542' : '#4ad991');
+          return {
+            label: b.label, timeText: b.start + ' → ' + b.end, mins: b.mins + ' min',
+            rowStyle: { display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 4px', borderBottom: '1px solid #16181d', opacity: kind === 'past' ? '.5' : '1' },
+            tagStyle: { display: 'inline-flex', alignItems: 'center', flex: '0 0 auto', padding: '3px 9px', borderRadius: '6px', fontSize: '11.5px', fontWeight: 700, background: c + '22', color: c, border: '1px solid ' + c + '55' },
+            stateLabel, stateStyle: { fontSize: '11px', fontWeight: 700, letterSpacing: '.3px', color: stateColor, whiteSpace: 'nowrap' },
+          };
+        });
+      })(),
+      closeBreaksModal: () => this.setState({ breaksModal: null }),
+
+      // cadastro (mesmo modal serve para criar E editar/excluir — CRUD)
       cadastroOpen: st.cadastroOpen,
+      cadastroIsEdit: !!(st.form && st.form.editId),
+      cadastroTitle: (st.form && st.form.editId) ? 'Editar operador' : 'Novo operador',
+      cadastroSubtitle: (st.form && st.form.editId) ? 'Atualize os dados ou exclua o operador' : 'Nome, turno e horários de pausa',
+      saveCadastroLabel: (st.form && st.form.editId) ? 'Salvar alterações' : 'Salvar operador',
+      askDelete: () => { if (st.form && st.form.editId) this.askConfirm(st.form.editId, 'delete'); },
       openCadastro: () => this.openCadastro(),
       closeCadastro: () => this.setState({ cadastroOpen: false }),
       stop: (e) => e.stopPropagation(),
@@ -1391,20 +1501,24 @@ class Component extends DCLogic {
 
       // confirmação de pausa (dialog)
       confirmOpen: !!st.confirm,
-      confirmTitle: st.confirm ? (st.confirm.action === 'start' ? ('Iniciar ' + (st.confirm.label || 'pausa')) : ('Finalizar ' + (st.confirm.label || 'pausa'))) : '',
+      confirmTitle: st.confirm ? (st.confirm.action === 'start' ? ('Iniciar ' + (st.confirm.label || 'pausa')) : (st.confirm.action === 'delete' ? 'Excluir operador' : ('Finalizar ' + (st.confirm.label || 'pausa')))) : '',
       confirmMsg: st.confirm
         ? (st.confirm.action === 'start'
             ? 'Iniciar ' + (st.confirm.label || 'pausa') + ' de ' + st.confirm.name + ' agora?'
-            : 'Finalizar a ' + (st.confirm.label || 'pausa') + ' de ' + st.confirm.name + '? Ele voltará a trabalhar.')
+            : st.confirm.action === 'delete'
+              ? 'Remover ' + st.confirm.name + ' da lista? Esta ação não pode ser desfeita.'
+              : 'Finalizar a ' + (st.confirm.label || 'pausa') + ' de ' + st.confirm.name + '? Ele voltará a trabalhar.')
         : '',
-      confirmBtnLabel: st.confirm ? (st.confirm.action === 'start' ? 'Iniciar pausa' : 'Finalizar pausa') : '',
-      confirmBtnStyle: (st.confirm && st.confirm.action === 'finish')
-        ? { padding: '10px 18px', borderRadius: '10px', border: 'none', background: '#f5c542', color: '#1a1400', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer' }
-        : { padding: '10px 18px', borderRadius: '10px', border: 'none', background: '#4f8ef7', color: '#fff', fontSize: '13.5px', fontWeight: 600, cursor: 'pointer' },
+      confirmBtnLabel: st.confirm ? (st.confirm.action === 'start' ? 'Iniciar pausa' : (st.confirm.action === 'delete' ? 'Excluir' : 'Finalizar pausa')) : '',
+      confirmBtnStyle: (st.confirm && st.confirm.action === 'delete')
+        ? { padding: '10px 18px', borderRadius: '10px', border: 'none', background: '#e5484d', color: '#fff', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer' }
+        : (st.confirm && st.confirm.action === 'finish')
+          ? { padding: '10px 18px', borderRadius: '10px', border: 'none', background: '#f5c542', color: '#1a1400', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer' }
+          : { padding: '10px 18px', borderRadius: '10px', border: 'none', background: '#4f8ef7', color: '#fff', fontSize: '13.5px', fontWeight: 600, cursor: 'pointer' },
       confirmIconStyle: {
         width: '40px', height: '40px', borderRadius: '11px', flex: '0 0 40px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: (st.confirm && st.confirm.action === 'finish') ? 'rgba(234,179,8,.14)' : 'rgba(79,142,247,.14)',
-        color: (st.confirm && st.confirm.action === 'finish') ? '#f5c542' : '#6aa8ff',
+        background: (st.confirm && st.confirm.action === 'delete') ? 'rgba(229,72,77,.14)' : ((st.confirm && st.confirm.action === 'finish') ? 'rgba(234,179,8,.14)' : 'rgba(79,142,247,.14)'),
+        color: (st.confirm && st.confirm.action === 'delete') ? '#ff6369' : ((st.confirm && st.confirm.action === 'finish') ? '#f5c542' : '#6aa8ff'),
       },
       closeConfirm: () => this.setState({ confirm: null }),
       doConfirm: () => this.runConfirm(),

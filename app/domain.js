@@ -226,3 +226,29 @@ export function buildEmployees() {
   });
   return list;
 }
+
+// ---- Histórico (amostra derivada dos operadores + categorias 10/30) ----
+export function buildHistory(emps) {
+  return emps.slice(0, 14).map((e, i) => {
+    const b = (e.breaks && e.breaks.length) ? e.breaks[i % e.breaks.length] : mkBreak('10', '09:00');
+    const isLong = b.type === '30';
+    const over = i % 6 === 0; // alguns estouraram o tempo
+    const dispDur = (isLong ? 30 : 10) + (over ? 3 : 0);
+    return {
+      name: e.name, initials: initials(e.name), color: e.color,
+      type: b.label, typeColor: isLong ? '#a78bfa' : '#f5c542',
+      date: '0' + (5 - (i % 5)) + '/07', start: b.start, end: addMin(b.start, dispDur),
+      duration: String(dispDur).padStart(2, '0') + ':00', over,
+    };
+  });
+}
+
+// ---- Preview do modelo de importação (mostrado na tela de Importação) ----
+export const TEMPLATE_PREVIEW = [
+  'OPERADOR,TURNO,ENTRADA,SAIDA,SABADO ENTRADA,SABADO SAIDA,PAUSA 10,PAUSA 30,PAUSA 60,PAUSA 10 (2a)',
+  'Maria Souza,integral,08:00,17:02,-,-,10:00,-,12:00,15:00',
+  'Joao Lima,manha,08:00,14:20,08:00,14:20,10:00,12:00,-,-',
+  'Ana Pereira,manha,10:00,16:20,09:00,15:20,12:00,14:00,-,-',
+  'Pedro Rocha,tarde,14:20,20:40,08:00,14:20,16:20,18:30,-,-',
+  'Lucas Alves,tarde,14:20,20:40,09:00,15:20,16:20,18:30,-,-',
+].join('\n');

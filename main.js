@@ -350,6 +350,18 @@ ipcMain.on('open-external', (_event, url) => {
   if (typeof url === 'string' && /^(https?:|mailto:)/i.test(url)) shell.openExternal(url);
 });
 
+// ---- Histórico: arquivo LOCAL protegido em appData (userData), lido/escrito
+// somente pelo app. Fica em %APPDATA%/<app>/history.json. ----
+const historyFilePath = () => path.join(app.getPath('userData'), 'history.json');
+ipcMain.handle('history:load', () => {
+  try { const raw = fs.readFileSync(historyFilePath(), 'utf8'); const d = JSON.parse(raw); return Array.isArray(d) ? d : []; }
+  catch (e) { return []; }
+});
+ipcMain.handle('history:save', (_event, data) => {
+  try { fs.writeFileSync(historyFilePath(), JSON.stringify(Array.isArray(data) ? data : []), 'utf8'); return { ok: true }; }
+  catch (e) { return { ok: false, error: String(e && e.message || e) }; }
+});
+
 // Controles da janela (barra de título customizada) acionados pelos 3 botões.
 ipcMain.on('win-minimize', () => { if (mainWindow) mainWindow.minimize(); });
 ipcMain.on('win-maximize', () => {

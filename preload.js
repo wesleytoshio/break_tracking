@@ -24,6 +24,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // processo principal, repassado via additionalArguments.
   freeTestMode: process.argv.includes('--pausa-test-mode'),
 
+  // Histórico persistido em arquivo local protegido (appData/userData).
+  historyLoad: () => ipcRenderer.invoke('history:load'),
+  historySave: (data) => ipcRenderer.invoke('history:save', data),
+
   // Licenciamento offline.
   licenseStatus: () => ipcRenderer.invoke('license:status'),
   licenseMachineId: () => ipcRenderer.invoke('license:machineId'),

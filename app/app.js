@@ -6,7 +6,7 @@
 // ============================================================================
 import * as D from './domain.js';
 import { state, actions, subscribe, startClock } from './store.js';
-import { shellHTML, navHTML, topbarHTML, listHTML, placeholderHTML } from './view.js';
+import { shellHTML, navHTML, topbarHTML, listHTML, importHTML, historyHTML, creditsHTML } from './view.js';
 import { modalsHTML, toastsHTML } from './modals.js';
 
 const root = document.getElementById('app');
@@ -25,7 +25,24 @@ function modalSig() {
   return '';
 }
 
-function render() {
+// No 'tick' (segundos normais) NÃO reconstruímos o DOM — só atualizamos os
+// cronômetros no lugar. Assim um clique nunca cai entre um rebuild e some.
+function lightTick() {
+  const c = { now: state.now, phase: state.saturdayPhase, ended: state._endedToday };
+  document.querySelectorAll('[data-card]').forEach(el => {
+    const e = state.employees.find(x => x.id === Number(el.dataset.card));
+    if (!e) return;
+    if (D.computeStatus(e, c.now, c.phase, c.ended) !== 'pause') return; // só pausa muda a cada seg
+    const ab = D.activeBreak(e, c.now, c.phase, c.ended);
+    const rem = ab ? Math.max(0, Math.round((ab.endsAt - c.now) / 1000)) : 0;
+    const t = el.querySelector('.timer');
+    if (t) { t.textContent = D.fmt(rem); t.style.color = rem < 60 ? '#ef4444' : D.catColor(ab ? ab.type : e.pauseType); }
+  });
+  if (state.freeTestOpen) { const n = document.querySelector('.free-now'); if (n) n.textContent = D.hhmmss(state.now); }
+}
+
+function render(reason) {
+  if (reason === 'tick') { lightTick(); return; }
   // preserva foco/caret
   const act = document.activeElement;
   const focusId = act && act.id;
@@ -43,7 +60,10 @@ function render() {
   $('today-chip').innerHTML = tb.today;
 
   const isList = state.screen === 'pausa' || state.screen === 'trab' || state.screen === 'fora';
-  $('content').innerHTML = isList ? listHTML() : placeholderHTML();
+  $('content').innerHTML = isList ? listHTML()
+    : state.screen === 'import' ? importHTML()
+    : state.screen === 'historico' ? historyHTML()
+    : state.screen === 'creditos' ? creditsHTML() : '';
 
   const sig = modalSig();
   if (sig !== lastModalSig) { $('modal-root').innerHTML = modalsHTML(); lastModalSig = sig; }
@@ -90,6 +110,9 @@ root.addEventListener('click', (ev) => {
     case 'free-300': return actions.freeOffset(300);
     case 'export': return actions.exportExcel();
     case 'import': return actions.importExcel();
+    case 'download-template': return actions.downloadTemplate();
+    case 'hist-period': return actions.setHistPeriod(el.dataset.arg);
+    case 'open-external': return actions.openExternal(el.dataset.arg);
     case 'close-beta': return actions.closeBeta();
     case 'win-min': return actions.winMin();
     case 'win-max': return actions.winMax();
@@ -102,6 +125,7 @@ root.addEventListener('input', (ev) => {
   const el = ev.target; const f = el.dataset.field; if (!f) return;
   const v = el.value;
   if (f === 'search') return actions.setSearch(v);
+  if (f === 'histSearch') return actions.setHistSearch(v);
   if (f === 'nome') return actions.setForm({ nome: v });
   if (f === 'jornadaInicio') return actions.setForm({ jornadaInicio: v });
   if (f === 'jornadaFim') return actions.setForm({ jornadaFim: v });

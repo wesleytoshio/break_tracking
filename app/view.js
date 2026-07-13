@@ -30,6 +30,11 @@ const IC = {
   sort: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 18V4"/></svg>',
   trash: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>',
   pencil: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>',
+  doc: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>',
+  download: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>',
+  mail: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>',
+  clockBig: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2"/><path d="M9 2h6"/></svg>',
 };
 
 const SCREENS = {
@@ -141,7 +146,7 @@ function cardHTML(e) {
   const jornadaText = e.jornada ? (e.jornada.inicio + '–' + e.jornada.fim) : '—';
 
   return `
-  <div class="card${isPause ? ' is-pause' : ''}">
+  <div class="card${isPause ? ' is-pause' : ''}" data-card="${e.id}">
     <div class="card-head">
       <div class="avatar" style="${avatarStyle(e.color, 42)}">${D.initials(e.name)}</div>
       <div class="who"><div class="name">${esc(e.name)}</div><span class="turno-chip" style="background:${info.color}1f;color:${info.color};border:1px solid ${info.color}44">${info.label}</span></div>
@@ -206,9 +211,97 @@ export function listHTML() {
   </div>`;
 }
 
-// ---- Placeholder para telas ainda em migração ----
-export function placeholderHTML() {
-  return `<div class="empty"><div class="ic">${IC.import}</div><div class="t">Tela em migração</div><div class="s">Esta tela ainda está sendo portada para a nova arquitetura.</div></div>`;
+// ---- Tela: Importação Excel ----
+export function importHTML() {
+  return `
+  <section class="screen-narrow">
+    <div class="dropzone" data-action="import">
+      <div class="dz-ic">${IC.import}</div>
+      <div class="dz-title">Importar escala de pausas</div>
+      <div class="dz-sub">Selecione uma planilha <span class="mono">.xlsx</span> no formato abaixo</div>
+      <button class="btn-primary" data-action="import">Selecionar planilha</button>
+    </div>
+    <div class="info-note">${IC.info}<div>Colunas (linha 1 = cabeçalho, 1 operador por linha):<br><span class="mono lite">OPERADOR · TURNO · ENTRADA · SAIDA · SABADO ENTRADA · SABADO SAIDA · PAUSA 10 · PAUSA 30 · PAUSA 60 · PAUSA 10 (2a)</span><br><b>TURNO</b>: integral / manha / tarde · horários em <b>HH:MM</b> · pausas são o <b>início</b> (o retorno é calculado) · use <span class="mono">-</span> quando não houver.</div></div>
+    <div class="example-box">
+      <div class="example-head"><div class="example-title">${IC.doc}EXEMPLO DO ARQUIVO</div><button class="icon-btn sm" data-action="download-template" title="Baixar modelo (.xlsx)">${IC.download}</button></div>
+      <div class="example-body"><pre>${esc(D.TEMPLATE_PREVIEW)}</pre></div>
+    </div>
+    <div class="export-card">
+      <div class="export-ic">${IC.download}</div>
+      <div class="grow"><div class="export-title">Exportar escala atual</div><div class="muted">Salva os operadores atuais em .xlsx no mesmo formato</div></div>
+      <button class="btn-export" data-action="export">Exportar</button>
+    </div>
+  </section>`;
+}
+
+// ---- Tela: Histórico (registros reais, persistidos) ----
+export function historyHTML() {
+  const now = state.now;
+  const q = state.histSearch.trim().toLowerCase();
+  const period = state.histPeriod;
+  const start0 = new Date(now); start0.setHours(0, 0, 0, 0);
+  const cutoff = period === 'hoje' ? start0.getTime() : now - (period === '30' ? 30 : 7) * 86400000;
+  const filtered = state.history.filter(h => h.ts >= cutoff && (!q || h.name.toLowerCase().includes(q)));
+  const chip = (p, label) => `<button class="chip${state.histPeriod === p ? ' active' : ''}" data-action="hist-period" data-arg="${p}">${label}</button>`;
+  const body = filtered.length
+    ? filtered.map(h => {
+      const cc = D.catColor(h.type);
+      const d = new Date(h.ts);
+      const date = ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2);
+      return `
+      <div class="hist-row">
+        <div class="hist-name"><div class="avatar sm" style="${avatarStyle(h.color, 28)}">${D.initials(h.name)}</div><span>${esc(h.name)}</span></div>
+        <div><span class="tag" style="background:${cc}1f;color:${cc};border:1px solid ${cc}3a">Pausa ${h.type}</span></div>
+        <div class="muted">${date}</div>
+        <div class="mono">${h.start}</div>
+        <div class="mono">${h.end}</div>
+        <div class="mono dur">${String(h.mins).padStart(2, '0')}:00</div>
+      </div>`;
+    }).join('')
+    : `<div class="hist-empty">${state.history.length ? 'Nenhum registro nesse período.' : 'Ainda não há registros. As pausas concluídas aparecerão aqui automaticamente.'}</div>`;
+  return `
+  <section>
+    <div class="hist-wrap">
+      <div class="hist-toolbar">
+        <div class="search sm">${IC.search}<input id="hist-search" data-field="histSearch" value="${esc(state.histSearch)}" placeholder="Buscar funcionário..."></div>
+        <div class="hist-chips">${chip('hoje', 'Hoje')}${chip('7', '7 dias')}${chip('30', '30 dias')}</div>
+        <div class="grow"></div>
+        <button class="btn-ghost disabled" disabled title="Em breve">${IC.download}Exportar</button>
+      </div>
+      <div class="hist-head"><div>FUNCIONÁRIO</div><div>TIPO DE PAUSA</div><div>DATA</div><div>INÍCIO</div><div>FIM</div><div class="right">DURAÇÃO</div></div>
+      ${body}
+    </div>
+  </section>`;
+}
+
+// ---- Tela: Créditos ----
+export function creditsHTML() {
+  return `
+  <section class="screen-credits">
+    <div class="credits-card">
+      <div class="credits-hero">
+        <div class="credits-logo">${IC.clockBig}</div>
+        <div class="credits-name">Controle de Pausas</div>
+        <div class="muted">Gestão operacional de pausas · v1.0.0</div>
+      </div>
+      <div class="credits-body">
+        <div class="credits-label">EQUIPE</div>
+        <div class="member">
+          <div class="m-avatar" style="background:rgba(244,114,182,.14);color:#f472b6;border:1px solid rgba(244,114,182,.3)">IL</div>
+          <div class="grow"><div class="m-name">Isadora Leblanc</div><div class="muted">Desenvolvedora</div><a class="m-mail" data-action="open-external" data-arg="mailto:isaleleite@gmail.com">isaleleite@gmail.com</a></div>
+        </div>
+        <div class="member">
+          <div class="m-avatar" style="background:rgba(79,142,247,.14);color:#6aa8ff;border:1px solid rgba(79,142,247,.3)">WD</div>
+          <div class="grow"><div class="m-name">Wesley Dev</div><div class="muted">Colaborador / Desenvolvedor</div><a class="m-mail" data-action="open-external" data-arg="mailto:wesley@wesleydev.com">wesley@wesleydev.com</a></div>
+        </div>
+        <div class="contact-box">
+          <div class="muted">Dúvidas, sugestões ou suporte? Entre em contato:</div>
+          <button class="btn-primary contact-btn" data-action="open-external" data-arg="mailto:isaleleite@gmail.com">${IC.mail}isaleleite@gmail.com</button>
+        </div>
+      </div>
+    </div>
+    <div class="credits-footer">© 2026 Break Tracking · Todos os direitos reservados</div>
+  </section>`;
 }
 
 export { IC, esc, ctx, avatarStyle };

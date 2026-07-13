@@ -7,7 +7,8 @@ import * as D from './domain.js';
 
 const listeners = new Set();
 export function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); }
-export function emit() { for (const fn of listeners) fn(); }
+// reason: 'change' (re-render completo) ou 'tick' (só atualizar cronômetros no lugar).
+export function emit(reason = 'change') { for (const fn of listeners) fn(reason); }
 
 const emptyForm = () => ({ editId: null, nome: '', turno: 'manha', presetIndex: 0, jornadaInicio: '08:00', jornadaFim: '14:20', sabInicio: '08:00', sabFim: '14:20', breaks: [], newType: '10', newStart: '' });
 
@@ -27,9 +28,32 @@ export const state = {
   freeTest: false,       // habilitado por env (electronAPI.freeTestMode)
   freeTestOpen: false,
   freeForm: { name: 'Teste de notificação', targetTime: '' },
+  histSearch: '',
+  histPeriod: '7',
+  history: [], // carregado do arquivo local protegido (appData) por initHistory()
   toasts: [],
   _endedToday: new Set(),
 };
+
+// Persiste o histórico num arquivo local protegido em appData (userData),
+// lido/escrito só pelo app via processo principal (IPC).
+function saveHistory() { try { if (window.electronAPI && window.electronAPI.historySave) window.electronAPI.historySave(state.history); } catch (e) {} }
+async function initHistory() {
+  try {
+    if (window.electronAPI && window.electronAPI.historyLoad) {
+      const h = await window.electronAPI.historyLoad();
+      if (Array.isArray(h)) state.history = h;
+    }
+  } catch (e) {}
+  emit();
+}
+// Grava a pausa CONCLUÍDA agora (evento real). O histórico só cresce a partir
+// do momento em que o app está rodando e observa a pausa terminar — nada de
+// fabricar o passado a partir da escala.
+function recordHistory(e, b, now) {
+  state.history = [{ name: e.name, color: e.color, type: b.type, start: b.start, end: b.end, mins: b.mins, ts: now, dayStr: D.dayKey(now) }, ...state.history].slice(0, 1000);
+  saveHistory();
+}
 
 let _notified = new Set(), _notifiedDay = null, _prevMin = null, _testSeq = 0, _toastId = 1;
 
@@ -45,6 +69,8 @@ export function notify(kind, title, msg) {
 // ---- Loop de relógio (1s): status derivado + notificações nas viradas ----
 export function startClock() {
   if (window.electronAPI && window.electronAPI.freeTestMode) state.freeTest = true;
+  initHistory(); // carrega o histórico do arquivo (appData) + backfill do dia
+
   setInterval(() => {
     const now = Date.now();
     const d = new Date(now);
@@ -70,14 +96,16 @@ export function startClock() {
           const bkey = dayStr + '|' + e.id + '|' + b.start;
           if (state._endedToday.has(bkey)) continue;
           if (sm > _prevMin && sm <= curMin && !_notified.has('s|' + bkey)) { _notified.add('s|' + bkey); notifs.push({ kind: 'bstart', name: e.name, label: b.label, start: b.start, mins: b.mins }); }
-          if (em > _prevMin && em <= curMin && !_notified.has('e|' + bkey)) { _notified.add('e|' + bkey); notifs.push({ kind: 'bend', name: e.name }); }
+          if (em > _prevMin && em <= curMin && !_notified.has('e|' + bkey)) { _notified.add('e|' + bkey); notifs.push({ kind: 'bend', name: e.name }); recordHistory(e, b, now); }
         }
       }
     }
     if (_prevMin == null || minuteChanged) _prevMin = curMin;
     if (changed) state.employees = employees;
     state.now = now;
-    emit();
+    // Estrutural só quando alguém muda de status (fim de pausa) ou vira o minuto
+    // (transições agendadas). Nos demais segundos, 'tick' = só cronômetros.
+    emit((changed || minuteChanged) ? 'change' : 'tick');
     notifs.forEach(n => {
       if (n.kind === 'end') notify('ok', n.isTest ? 'Teste concluído' : 'Pausa concluída', n.isTest ? (n.name + ' — notificação disparada no horário') : (n.name + ' voltou a trabalhar'));
       else if (n.kind === 'bstart') notify('warn', (n.label || 'Pausa') + ' — ' + n.name, 'Início às ' + n.start + ' · ' + n.mins + ' min');
@@ -116,6 +144,8 @@ export const actions = {
   toggleMenu() { set({ collapsed: !state.collapsed }); },
   setSearch(v) { set({ search: v }); },
   toggleSort() { set({ sortDir: state.sortDir === 'asc' ? 'desc' : 'asc' }); },
+  setHistSearch(v) { set({ histSearch: v }); },
+  setHistPeriod(p) { set({ histPeriod: p }); },
 
   askConfirm(id, action) {
     const e = state.employees.find(x => x.id === id); if (!e) return;

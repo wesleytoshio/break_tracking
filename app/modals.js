@@ -143,7 +143,7 @@ export function modalsHTML() {
         <div class="field"><label>Nome</label><input id="f-freename" data-field="freeName" value="${esc(f.name)}"></div>
         <div class="field"><label>Horário do disparo <span class="hint">— hoje, HH:MM:SS</span></label>
           <div class="row gap tiny"><button class="chip-btn" data-action="free-20">agora +20s</button><button class="chip-btn" data-action="free-60">+1 min</button><button class="chip-btn" data-action="free-300">+5 min</button></div>
-          <div class="row"><input type="time" step="1" data-field="freeTarget" value="${f.targetTime}" class="grow mono-in"><span class="muted nowrap">agora <span class="mono">${D.hhmmss(state.now)}</span></span></div>
+          <div class="row"><input type="time" step="1" data-field="freeTarget" value="${f.targetTime}" class="grow mono-in"><span class="muted nowrap">agora <span class="mono free-now">${D.hhmmss(state.now)}</span></span></div>
         </div>
         <div class="note-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b727c" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><div>A notificação dispara no horário definido. Clique <b>Iniciar teste</b> quantas vezes quiser para simular vários no dia. Feche e deixe o app aberto para ser notificado.</div></div>
       </div>

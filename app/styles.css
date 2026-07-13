@@ -157,10 +157,17 @@ button svg { pointer-events: none; }
 
 /* ---- Grid de cards ---- */
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)); gap: 14px; padding: 18px; }
-.card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; padding: 16px; cursor: pointer; transition: border-color .12s; }
-.card:hover { border-color: var(--blue); }
+.card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; padding: 16px; transition: border-color .12s; }
+.card:hover { border-color: #3a414b; }
 .card.is-pause { border-color: #3a3110; }
 .card-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 15px; }
+.card-tools { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.status-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--sc); box-shadow: 0 0 8px 1px var(--sc); flex: 0 0 11px; }
+.status-dot.off { box-shadow: none; opacity: .65; }
+.status-dot.pulse { animation: cp-glow 1.6s ease-in-out infinite; }
+@keyframes cp-glow { 0%, 100% { box-shadow: 0 0 6px 1px var(--sc); } 50% { box-shadow: 0 0 13px 4px var(--sc); } }
+.edit-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--panel-2); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .12s, color .12s, background .12s; }
+.edit-btn:hover { border-color: var(--blue); color: var(--blue-soft); background: rgba(79,142,247,.1); }
 .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
 .card-head .who { flex: 1; min-width: 0; }
 .card-head .name { font-size: 14.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

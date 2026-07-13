@@ -29,6 +29,7 @@ const IC = {
   search: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
   sort: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 18V4"/></svg>',
   trash: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>',
+  pencil: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
 };
 
 const SCREENS = {
@@ -127,43 +128,35 @@ function cardHTML(e) {
   const up = (e.breaks || []).filter(b => D.hhmmToMin(b.end) > nm).sort((a, b) => D.hhmmToMin(a.start) - D.hhmmToMin(b.start));
   const pausasNext = up.length ? up[0].start : '—';
   const more = Math.max(0, up.length - 1);
-  const clickable = up.length >= 2;
+  // Clicável sempre que houver pausas no dia (abre o modal com o dia todo);
+  // o "+N" só aparece quando há mais de uma pela frente.
+  const clickable = !!(e.breaks && e.breaks.length);
 
-  let badgeCls, badgeLabel, actionHTML;
-  if (isOff) {
-    badgeCls = 'background:rgba(138,145,155,.12);color:#9aa1ab;border:1px solid rgba(138,145,155,.25)';
-    badgeLabel = 'Fora';
-    actionHTML = `<button class="card-action off" disabled>Fora do expediente</button>`;
-  } else if (isPause) {
-    badgeCls = `background:${cc}22;color:${cc};border:1px solid ${cc}55`;
-    badgeLabel = (ab && ab.label) || 'Em pausa';
-    actionHTML = `<button class="card-action finish" data-action="card-action" data-id="${e.id}" data-act="finish">Finalizar pausa</button>`;
-  } else {
-    badgeCls = 'background:rgba(47,191,113,.13);color:#4ad991;border:1px solid rgba(47,191,113,.25)';
-    badgeLabel = 'Trabalhando';
-    actionHTML = `<button class="card-action start" data-action="card-action" data-id="${e.id}" data-act="start">Iniciar pausa</button>`;
-  }
+  const statusColor = isOff ? '#6b727c' : (isPause ? '#f5c542' : '#4ad991');
+  const statusName = isOff ? 'Fora do expediente' : (isPause ? 'Em pausa' : 'Trabalhando');
+  const dotCls = 'status-dot' + (isPause ? ' pulse' : (isOff ? ' off' : ''));
   const metaLabel = isOff ? 'PRÓXIMA ENTRADA' : (isPause ? ('EM ' + ((ab && ab.label) || 'PAUSA').toUpperCase()) : (nb ? ('PRÓXIMA · ' + nb.label.toUpperCase()) : 'SEM PAUSAS'));
   const metaValue = isOff ? (e.jornada ? e.jornada.inicio : '—') : (isPause ? D.fmt(rem) : (nb ? (nb.start + ' → ' + nb.end) : '—'));
   const timerColor = isOff ? '#8a919b' : (isPause ? (rem < 60 ? '#ef4444' : cc) : '#c5c9cf');
   const jornadaText = e.jornada ? (e.jornada.inicio + '–' + e.jornada.fim) : '—';
 
   return `
-  <div class="card${isPause ? ' is-pause' : ''}" data-action="edit-op" data-id="${e.id}">
+  <div class="card${isPause ? ' is-pause' : ''}">
     <div class="card-head">
       <div class="avatar" style="${avatarStyle(e.color, 42)}">${D.initials(e.name)}</div>
       <div class="who"><div class="name">${esc(e.name)}</div><span class="turno-chip" style="background:${info.color}1f;color:${info.color};border:1px solid ${info.color}44">${info.label}</span></div>
-      <span class="status-badge" style="${badgeCls}"><span class="dot" style="background:${cc}"></span>${esc(badgeLabel)}</span>
+      <div class="card-tools">
+        <span class="${dotCls}" style="--sc:${statusColor}" title="${statusName}"></span>
+        <button class="edit-btn" data-action="edit-op" data-id="${e.id}" title="Editar operador">${IC.pencil}</button>
+      </div>
     </div>
     <div class="info-grid">
       <div class="info-cell"><div class="k">JORNADA</div><div class="v">${jornadaText}</div></div>
-      <div class="info-cell${clickable ? ' clickable' : ''}"${clickable ? ` data-action="open-breaks" data-id="${e.id}"` : ''}><div class="k">PRÓX. PAUSAS</div><div class="v">${pausasNext}${clickable ? `<span class="more-pill">+${more}</span>` : ''}</div></div>
+      <div class="info-cell${clickable ? ' clickable' : ''}"${clickable ? ` data-action="open-breaks" data-id="${e.id}"` : ''}><div class="k">PRÓX. PAUSAS</div><div class="v">${pausasNext}${more > 0 ? `<span class="more-pill">+${more}</span>` : ''}</div></div>
     </div>
     <div class="card-meta">
       <div><div class="k">${metaLabel}</div><div class="timer" style="color:${timerColor}">${metaValue}</div></div>
-      ${isPause ? `<div class="pulse-ring"><span class="p"></span></div>` : ''}
     </div>
-    ${actionHTML}
   </div>`;
 }
 

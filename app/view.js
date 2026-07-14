@@ -14,7 +14,7 @@ const IC = {
   logo: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
   pausa: svg('<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>'),
   trab: svg('<path d="M20 6 9 17l-5-5"/>'),
-  fora: svg('<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>'),
+  fora: svg('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>'),
   import: svg('<path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>'),
   history: svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 8v4l3 2"/>'),
   credits: svg('<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/>'),
@@ -55,7 +55,7 @@ export function shellHTML() {
   <div class="app${state.collapsed ? ' collapsed' : ''}" id="app-root">
     <aside class="sidebar cp-drag">
       <div class="brand">
-        <div class="brand-logo cp-nodrag">${IC.logo}</div>
+        <img class="brand-logo cp-nodrag" src="../assets/icon.svg" alt="Controle de Pausas" draggable="false">
         <div class="brand-text"><div class="t">Controle de Pausas</div><div class="s">Gestão operacional</div></div>
       </div>
       <div class="nav-label">NAVEGAÇÃO</div>
@@ -280,7 +280,7 @@ export function creditsHTML() {
   <section class="screen-credits">
     <div class="credits-card">
       <div class="credits-hero">
-        <div class="credits-logo">${IC.clockBig}</div>
+        <img class="credits-logo" src="../assets/icon.svg" alt="Controle de Pausas" draggable="false">
         <div class="credits-name">Controle de Pausas</div>
         <div class="muted">Gestão operacional de pausas · v1.0.0</div>
       </div>

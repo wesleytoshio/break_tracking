@@ -28,6 +28,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   historyLoad: () => ipcRenderer.invoke('history:load'),
   historySave: (data) => ipcRenderer.invoke('history:save', data),
 
+  // Operadores persistidos em arquivo local (appData/userData).
+  operatorsLoad: () => ipcRenderer.invoke('operators:load'),
+  operatorsSave: (data) => ipcRenderer.invoke('operators:save', data),
+
   // Licenciamento offline.
   licenseStatus: () => ipcRenderer.invoke('license:status'),
   licenseMachineId: () => ipcRenderer.invoke('license:machineId'),

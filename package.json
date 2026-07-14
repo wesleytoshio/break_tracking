@@ -10,8 +10,10 @@
     "dist": "electron-builder --win"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "electron": "^33.4.11",
-    "electron-builder": "^26.15.3"
+    "electron-builder": "^26.15.3",
+    "png-to-ico": "^3.0.2"
   },
   "build": {
     "appId": "com.controledepausas.desktop",
@@ -19,6 +21,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "app/**",
       "Controle de Pausas.dc.html",
       "support.js",
       "vendor/**",

@@ -105,10 +105,13 @@ if (process.platform === 'win32') {
 }
 
 const HTML_FILE = 'Controle de Pausas.dc.html';
-// Nova arquitetura (view separada, sem DataCosmos) — em migração. Com PAUSA_NEW_UI=1
-// carrega app/index.html; sem a env, segue o .dc.html atual (não quebra nada).
-const NEW_UI = /^(1|true|on|yes)$/i.test(String(process.env.PAUSA_NEW_UI || '').trim());
-const ENTRY_FILE = NEW_UI ? path.join('app', 'index.html') : HTML_FILE;
+// A UI nova (view separada em app/, sem DataCosmos) é o PADRÃO. A antiga (.dc.html)
+// fica como fallback de segurança: para voltar a ela, rode com PAUSA_OLD_UI=1.
+const OLD_UI = /^(1|true|on|yes)$/i.test(String(process.env.PAUSA_OLD_UI || '').trim());
+const ENTRY_FILE = OLD_UI ? HTML_FILE : path.join('app', 'index.html');
+// Efeito "vidro" (acrylic) só no Windows 11 (build >= 22000). No Win10 o
+// backgroundMaterial é ignorado, então usamos fundo sólido para não ficar transparente.
+const isWin11 = process.platform === 'win32' && parseInt((require('os').release().split('.')[2] || '0'), 10) >= 22000;
 const ICON_ICO = path.join(__dirname, 'assets', 'icon.ico');
 const ICON_PNG = path.join(__dirname, 'assets', 'icon.png');
 
@@ -123,7 +126,8 @@ function createWindow() {
     height: 820,
     minWidth: 960,
     minHeight: 640,
-    backgroundColor: '#0c0d10',
+    backgroundColor: isWin11 ? '#00000000' : '#0c0d10', // transparente (Win11) p/ o acrylic aparecer
+    backgroundMaterial: isWin11 ? 'acrylic' : 'none',   // Win11: desfoca o que está atrás (efeito vidro)
     title: 'Controle de Pausas',
     icon: ICON_ICO,
     show: false,
@@ -148,6 +152,10 @@ function createWindow() {
 
   mainWindow.loadFile(path.join(__dirname, ENTRY_FILE));
   mainWindow.once('ready-to-show', () => mainWindow.show());
+
+  // Reforça o ícone da janela/barra de tarefas em runtime (HICON fresco). No modo
+  // dev (electron.exe) o `icon:` acima nem sempre pega; setar via nativeImage garante.
+  try { const img = nativeImage.createFromPath(ICON_PNG); if (!img.isEmpty()) mainWindow.setIcon(img); } catch (e) {}
 
   // Fechar a janela NÃO encerra o app: esconde na bandeja (comportamento
   // Discord/Steam). O app só sai de verdade pelo menu "Sair" da bandeja.
@@ -359,6 +367,18 @@ ipcMain.handle('history:load', () => {
 });
 ipcMain.handle('history:save', (_event, data) => {
   try { fs.writeFileSync(historyFilePath(), JSON.stringify(Array.isArray(data) ? data : []), 'utf8'); return { ok: true }; }
+  catch (e) { return { ok: false, error: String(e && e.message || e) }; }
+});
+
+// ---- Operadores: arquivo local em appData (persistem entre execuções). O app
+// instalado nasce SEM operadores; o que o usuário cadastra/importa fica aqui. ----
+const operatorsFilePath = () => path.join(app.getPath('userData'), 'operators.json');
+ipcMain.handle('operators:load', () => {
+  try { const d = JSON.parse(fs.readFileSync(operatorsFilePath(), 'utf8')); return Array.isArray(d) ? d : []; }
+  catch (e) { return []; }
+});
+ipcMain.handle('operators:save', (_event, data) => {
+  try { fs.writeFileSync(operatorsFilePath(), JSON.stringify(Array.isArray(data) ? data : []), 'utf8'); return { ok: true }; }
   catch (e) { return { ok: false, error: String(e && e.message || e) }; }
 });
 

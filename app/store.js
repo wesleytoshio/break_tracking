@@ -19,7 +19,7 @@ export const state = {
   sortDir: 'asc',
   now: Date.now(),
   saturdayPhase: 0,
-  employees: D.buildEmployees(),
+  employees: [], // carregado do arquivo (appData); build de produção nasce vazio
   cadastro: null,        // form em edição/criação (ou null = fechado)
   breaksModal: null,     // { id }
   confirm: null,         // { id, action: 'start'|'finish'|'delete', name, label }
@@ -47,6 +47,17 @@ async function initHistory() {
   } catch (e) {}
   emit();
 }
+
+// Operadores: persistidos em arquivo local (appData). Nunca salva os de teste.
+function saveOperators() { try { if (window.electronAPI && window.electronAPI.operatorsSave) window.electronAPI.operatorsSave(state.employees.filter(e => !e.isTest)); } catch (e) {} }
+async function initOperators() {
+  let ops = [];
+  try { if (window.electronAPI && window.electronAPI.operatorsLoad) { const d = await window.electronAPI.operatorsLoad(); if (Array.isArray(d)) ops = d; } } catch (e) {}
+  if (ops.length) state.employees = ops;
+  else if (window.electronAPI && window.electronAPI.freeTestMode) state.employees = D.buildEmployees(); // seed de amostra só em modo dev/teste
+  else state.employees = []; // build de produção: começa sem operadores
+  emit();
+}
 // Grava a pausa CONCLUÍDA agora (evento real). O histórico só cresce a partir
 // do momento em que o app está rodando e observa a pausa terminar — nada de
 // fabricar o passado a partir da escala.
@@ -69,7 +80,8 @@ export function notify(kind, title, msg) {
 // ---- Loop de relógio (1s): status derivado + notificações nas viradas ----
 export function startClock() {
   if (window.electronAPI && window.electronAPI.freeTestMode) state.freeTest = true;
-  initHistory(); // carrega o histórico do arquivo (appData) + backfill do dia
+  initOperators(); // carrega os operadores do arquivo (appData); produção começa vazio
+  initHistory();   // carrega o histórico do arquivo (appData)
 
   setInterval(() => {
     const now = Date.now();
@@ -135,6 +147,7 @@ function deleteOperator(id) {
   const e = state.employees.find(x => x.id === id);
   state.employees = state.employees.filter(x => x.id !== id);
   state.cadastro = null;
+  saveOperators();
   if (e) notify('ok', 'Operador removido', e.name + ' foi excluído'); emit();
 }
 
@@ -188,6 +201,7 @@ export const actions = {
       state.employees = [emp, ...state.employees];
       notify('ok', 'Operador cadastrado', f.nome.trim() + ' foi adicionado');
     }
+    saveOperators();
     set({ cadastro: null });
   },
   askDelete() { if (state.cadastro && state.cadastro.editId) actions.askConfirm(state.cadastro.editId, 'delete'); },
@@ -240,7 +254,7 @@ export const actions = {
       if (!res) return;
       if (res.error) { notify('err', 'Falha ao importar', res.error); return; }
       if (!res.rows || !res.rows.length) { notify('warn', 'Nada importado', 'Nenhum operador encontrado na planilha'); return; }
-      state.employees = D.operatorsFromImport(res.rows); state.screen = 'trab'; emit();
+      state.employees = D.operatorsFromImport(res.rows); state.screen = 'trab'; saveOperators(); emit();
       notify('ok', 'Escala importada', state.employees.length + ' operadores de ' + res.fileName);
     }).catch(err => notify('err', 'Falha ao importar', String(err && err.message || err)));
   },

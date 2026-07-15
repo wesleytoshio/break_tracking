@@ -64,8 +64,8 @@ export function modalsHTML() {
         <div class="field"><label>Pausas <span class="hint">— informe o início; o retorno é calculado</span></label>
           <div class="row gap">
             <select data-field="newType">${opts([{ v: '10', l: 'Pausa 10 (10 min)' }, { v: '30', l: 'Pausa 30 (30 min)' }, { v: '60', l: 'Pausa 60 (60 min)' }], f.newType)}</select>
-            <input type="time" data-field="newStart" value="${f.newStart}" class="w-time">
-            <button class="btn-add${canAdd ? '' : ' disabled'}" data-action="add-break"${canAdd ? '' : ' disabled'}>+ Add</button>
+            <input id="f-newstart" type="time" data-field="newStart" value="${f.newStart}" class="w-time">
+            <button id="f-addbreak" class="btn-add${canAdd ? '' : ' disabled'}" data-action="add-break"${canAdd ? '' : ' disabled'}>+ Add</button>
           </div>
           ${f.breaks.length ? `<div class="break-list">${breakItems}</div>` : ''}
         </div>
@@ -74,7 +74,7 @@ export function modalsHTML() {
         <div>${isEdit ? `<button class="btn-danger-soft" data-action="ask-delete">${IC.trash}Excluir</button>` : ''}</div>
         <div class="row gap">
           <button class="btn-flat" data-action="close-cadastro">Cancelar</button>
-          <button class="btn-primary${saveDis ? ' disabled' : ''}" data-action="save-cadastro"${saveDis ? ' disabled' : ''}>${isEdit ? 'Salvar alterações' : 'Salvar operador'}</button>
+          <button id="f-save" class="btn-primary${saveDis ? ' disabled' : ''}" data-action="save-cadastro"${saveDis ? ' disabled' : ''}>${isEdit ? 'Salvar alterações' : 'Salvar operador'}</button>
         </div>
       </div>`, 'close-cadastro', 100);
   }
@@ -143,7 +143,7 @@ export function modalsHTML() {
         <div class="field"><label>Nome</label><input id="f-freename" data-field="freeName" value="${esc(f.name)}"></div>
         <div class="field"><label>Horário do disparo <span class="hint">— hoje, HH:MM:SS</span></label>
           <div class="row gap tiny"><button class="chip-btn" data-action="free-20">agora +20s</button><button class="chip-btn" data-action="free-60">+1 min</button><button class="chip-btn" data-action="free-300">+5 min</button></div>
-          <div class="row"><input type="time" step="1" data-field="freeTarget" value="${f.targetTime}" class="grow mono-in"><span class="muted nowrap">agora <span class="mono free-now">${D.hhmmss(state.now)}</span></span></div>
+          <div class="row"><input id="f-freetarget" type="time" step="1" data-field="freeTarget" value="${f.targetTime}" class="grow mono-in"><span class="muted nowrap">agora <span class="mono free-now">${D.hhmmss(state.now)}</span></span></div>
         </div>
         <div class="note-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b727c" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><div>A notificação dispara no horário definido. Clique <b>Iniciar teste</b> quantas vezes quiser para simular vários no dia. Feche e deixe o app aberto para ser notificado.</div></div>
       </div>

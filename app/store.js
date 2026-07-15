@@ -180,7 +180,9 @@ export const actions = {
     set({ cadastro: { editId: e.id, nome: e.name, turno: e.turno, presetIndex: 0, jornadaInicio: e.jornada ? e.jornada.inicio : '08:00', jornadaFim: e.jornada ? e.jornada.fim : '14:20', sabInicio: e.jornadaSab ? e.jornadaSab.inicio : '08:00', sabFim: e.jornadaSab ? e.jornadaSab.fim : '14:20', breaks: (e.breaks || []).map(b => D.mkBreak(b.type, b.start)), newType: '10', newStart: '' } });
   },
   closeCadastro() { set({ cadastro: null }); },
-  setForm(patch) { state.cadastro = { ...state.cadastro, ...patch }; emit(); },
+  // Silencioso (sem emit): o texto já está no input; o botão Salvar/Add é
+  // atualizado direto no DOM pelo handler. Evita qualquer re-render ao digitar.
+  setForm(patch) { state.cadastro = { ...state.cadastro, ...patch }; },
   applyPreset(turno, idx) {
     const list = D.shiftPresets()[turno] || D.shiftPresets().manha;
     const p = list[idx] || list[0]; if (!p) return;
@@ -222,8 +224,8 @@ export const actions = {
   // teste livre de notificação
   openFreeTest() { set({ freeTestOpen: true, freeForm: { name: 'Teste de notificação', targetTime: D.hhmmss(Date.now() + 20000) } }); },
   closeFreeTest() { set({ freeTestOpen: false }); },
-  setFreeName(v) { state.freeForm = { ...state.freeForm, name: v }; emit(); },
-  setFreeTarget(v) { state.freeForm = { ...state.freeForm, targetTime: v }; emit(); },
+  setFreeName(v) { state.freeForm = { ...state.freeForm, name: v }; },
+  setFreeTarget(v) { state.freeForm = { ...state.freeForm, targetTime: v }; },
   freeOffset(secs) { state.freeForm = { ...state.freeForm, targetTime: D.hhmmss(Date.now() + secs * 1000) }; emit(); },
   startFreeTest() {
     const f = state.freeForm;

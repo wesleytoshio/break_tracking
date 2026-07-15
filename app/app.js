@@ -14,15 +14,35 @@ root.innerHTML = shellHTML();
 
 const $ = (id) => document.getElementById(id);
 let lastModalSig = null;
+let lastContentSig = null;
+
+// Atualiza o input de horário do teste sem reconstruir o modal (usado pelos atalhos).
+function syncFreeTarget() { const el = $('f-freetarget'); if (el) el.value = state.freeForm.targetTime; }
 
 function modalSig() {
-  if (state.cadastro) return 'cad|' + JSON.stringify(state.cadastro);
+  if (state.cadastro) {
+    // Só a ESTRUTURA re-renderiza o modal. O texto digitado (nome, horários) fica
+    // no DOM e NÃO força rebuild a cada tecla — evita o modal piscar. Os booleans
+    // atualizam os botões (Salvar/Add) só quando cruzam o limite habilitar/desabilitar.
+    const c = state.cadastro;
+    return 'cad|' + c.editId + '|' + c.turno + '|' + c.presetIndex + '|' + c.newType + '|' + JSON.stringify(c.breaks);
+  }
   if (state.confirm) return 'conf|' + JSON.stringify(state.confirm);
   if (state.breaksModal) return 'brk|' + state.breaksModal.id + '|' + D.nowMin(state.now);
   if (state.saturdayModal) return 'sat|' + state.saturdayPhase;
   if (state.betaOpen) return 'beta';
-  if (state.freeTestOpen) return 'free|' + JSON.stringify(state.freeForm) + '|' + Math.floor(state.now / 1000) + '|' + state.employees.filter(e => e.isTest).length;
+  if (state.freeTestOpen) return 'free|' + state.employees.filter(e => e.isTest).length;
   return '';
+}
+
+// Assinatura do conteúdo: só reconstrói #content quando algo da tela muda (evita
+// redesenhar os 34 cards — que aparecem atrás do modal de vidro — a cada tecla).
+function contentSig() {
+  const now = state.now, phase = state.saturdayPhase, ended = state._endedToday, s = state.screen;
+  if (s === 'import') return 'import';
+  if (s === 'creditos') return 'creditos';
+  if (s === 'historico') return 'hist|' + state.histSearch + '|' + state.histPeriod + '|' + state.history.length + '|' + D.nowMin(now);
+  return 'list|' + s + '|' + state.search + '|' + state.sortDir + '|' + state.employees.map(e => e.id + ':' + D.computeStatus(e, now, phase, ended)).join(',');
 }
 
 // No 'tick' (segundos normais) NÃO reconstruímos o DOM — só atualizamos os
@@ -59,11 +79,15 @@ function render(reason) {
   const sat = $('sat-chip'); sat.setAttribute('style', tb.sat); sat.innerHTML = tb.satInner;
   $('today-chip').innerHTML = tb.today;
 
-  const isList = state.screen === 'pausa' || state.screen === 'trab' || state.screen === 'fora';
-  $('content').innerHTML = isList ? listHTML()
-    : state.screen === 'import' ? importHTML()
-    : state.screen === 'historico' ? historyHTML()
-    : state.screen === 'creditos' ? creditsHTML() : '';
+  const csig = contentSig();
+  if (csig !== lastContentSig) {
+    const isList = state.screen === 'pausa' || state.screen === 'trab' || state.screen === 'fora';
+    $('content').innerHTML = isList ? listHTML()
+      : state.screen === 'import' ? importHTML()
+      : state.screen === 'historico' ? historyHTML()
+      : state.screen === 'creditos' ? creditsHTML() : '';
+    lastContentSig = csig;
+  }
 
   const sig = modalSig();
   if (sig !== lastModalSig) { $('modal-root').innerHTML = modalsHTML(); lastModalSig = sig; }
@@ -105,9 +129,9 @@ root.addEventListener('click', (ev) => {
     case 'open-freetest': return actions.openFreeTest();
     case 'close-freetest': return actions.closeFreeTest();
     case 'start-freetest': return actions.startFreeTest();
-    case 'free-20': return actions.freeOffset(20);
-    case 'free-60': return actions.freeOffset(60);
-    case 'free-300': return actions.freeOffset(300);
+    case 'free-20': actions.freeOffset(20); syncFreeTarget(); return;
+    case 'free-60': actions.freeOffset(60); syncFreeTarget(); return;
+    case 'free-300': actions.freeOffset(300); syncFreeTarget(); return;
     case 'export': return actions.exportExcel();
     case 'import': return actions.importExcel();
     case 'download-template': return actions.downloadTemplate();
@@ -126,12 +150,14 @@ root.addEventListener('input', (ev) => {
   const v = el.value;
   if (f === 'search') return actions.setSearch(v);
   if (f === 'histSearch') return actions.setHistSearch(v);
-  if (f === 'nome') return actions.setForm({ nome: v });
+  // Nome/newStart: atualizam o estado E o botão correspondente direto no DOM — sem
+  // reconstruir o modal (evita piscar a cada tecla). O texto já está no input.
+  if (f === 'nome') { actions.setForm({ nome: v }); const b = $('f-save'); if (b) { const d = !v.trim(); b.disabled = d; b.classList.toggle('disabled', d); } return; }
+  if (f === 'newStart') { actions.setForm({ newStart: v }); const b = $('f-addbreak'); if (b) { const ok = /^\d{1,2}:\d{2}$/.test(v); b.disabled = !ok; b.classList.toggle('disabled', !ok); } return; }
   if (f === 'jornadaInicio') return actions.setForm({ jornadaInicio: v });
   if (f === 'jornadaFim') return actions.setForm({ jornadaFim: v });
   if (f === 'sabInicio') return actions.setForm({ sabInicio: v });
   if (f === 'sabFim') return actions.setForm({ sabFim: v });
-  if (f === 'newStart') return actions.setForm({ newStart: v });
   if (f === 'freeName') return actions.setFreeName(v);
   if (f === 'freeTarget') return actions.setFreeTarget(v);
 });
